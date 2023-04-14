@@ -1,5 +1,6 @@
 import pandas
 import var
+from PySide6.QtWidgets import QMessageBox
 
 
 def load(path, headers=True):
@@ -43,42 +44,79 @@ def get_headers(df):
                'matr': '',
                'cobe': ''}
 
+    nome_found = False
+    cpf_found  = False
+    cnpj_found = False
+    apol_found = False
+    matr_found = False
+    cobe_found = False
+
     for column in df.columns:
 
-        if 'nome' in column.lower() or 'segurado' in column.lower():
+        if ('nome' in column.lower() or 'segurado' in column.lower()) and not nome_found:
             headers['name'] = column
+            nome_found = True
 
-        elif 'cpf' in column.lower():
+        elif 'cpf' in column.lower() and not cpf_found:
             headers['cpf'] = column
+            cpf_found = True
 
-        elif 'cnpj' in column.lower():
+        elif 'cnpj' in column.lower() and not cnpj_found:
             headers['cnpj'] = column
+            cnpj_found = True
 
-        elif 'matricula' in column.lower() or 'matrícula' in column.lower():
+        elif ('matricula' in column.lower() or 'matrícula' in column.lower()) and not matr_found:
             headers['matr'] = column
+            matr_found = True
 
-        elif 'cobertura' in column.lower():
+        elif 'cobertura' in column.lower() and not cobe_found:
             headers['cobe'] = column
+            cobe_found = True
 
-        elif var.apolice and ('apolice' in column.lower() or 'apólice' in column.lower()):
+        elif ('apolice' in column.lower() or 'apólice' in column.lower()) and var.apolice and not apol_found:
             headers['apol'] = column
+            apol_found = True
 
     if not any(headers['name']):
-        raise Exception('Não foi possível encontrar o campo "nome" na planilha.')
+        warning = QMessageBox()
+        warning.setText('Campo "nome" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
 
     if not any(headers['cpf']):
-        raise Exception('Não foi possível encontrar o campo "cpf" na planilha.')
+        warning = QMessageBox()
+        warning.setText('Campo "CPF" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
 
     if not any(headers['cnpj']):
-        raise Exception('Não foi possível encontrar o campo "cnpj" na planilha.')
+        warning = QMessageBox()
+        warning.setText('Campo "CNPJ" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
 
     if not any(headers['matr']):
-        raise Exception('Não foi possível encontrar o campo "matricula" na planilha.')
+        warning = QMessageBox()
+        warning.setText('Campo "matricula" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
 
     if not any(headers['cobe']):
-        raise Exception('Não foi possível encontrar o campo "cobertura" na planilha.')
+        warning = QMessageBox()
+        warning.setText('Campo "cobertura" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
 
     if var.apolice and not any(headers['apol']):
-        raise Exception('Não foi possível encontrar o campo "apolice" na planilha.')
+        warning = QMessageBox()
+        warning.setText('Campo "apolice" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
 
     return headers

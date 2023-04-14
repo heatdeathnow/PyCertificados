@@ -5,9 +5,11 @@ from pdfrw.toreportlab import makerl
 import textwrap
 from reader import *
 import threading
+import multiprocessing
 import time
 import parser
 import var
+from math import floor
 
 template = PdfReader(var.template, decompress=False)
 template_obj = pagexobj(template.pages[0])
@@ -42,7 +44,7 @@ def emit_singular(name, cpf, cnpj, matr, cobe, apol=None):
 
     lines = textwrap.wrap(text, 80)  # Quebra o texto contínuo em linha com no máximo segundo parâmetro de caracteres.
     y = 620  # Altura inicial do texto no PDF
-    x = 75  # Distância do texto à esquerda do PDF
+    x = 65  # Distância do texto à esquerda do PDF
 
     for line in lines:
         canvas.drawString(x, y, line)  # Escreve a linha por cima do modelo.
@@ -51,27 +53,64 @@ def emit_singular(name, cpf, cnpj, matr, cobe, apol=None):
     canvas.save()
 
 
+def emit_multiple(amount, name, cpf, cnpj, matr, cobe, apol=None):
+    for _ in range(amount):
+        emit_singular(name, cpf, cnpj, matr, cobe, apol)
+
+
 def emit_from_source():
     start_time = time.time()
     df = load(var.data_dir)
     headers = get_headers(df)
-
     var.max_progress = len(df.index)
 
+    # divisor = var.max_processes
+    # quotient = floor(var.max_progress / divisor)
+    # remainder = var.max_progress % divisor
+    # processes = []
+    #
+    # for i in range(divisor):
+    #     if i == divisor - 1:
+    #         processes.append(multiprocessing.Process(target=emit_multiple, args=((quotient + remainder,
+    #                                                                               df.loc[var.progress, headers['name']],
+    #                                                                               df.loc[var.progress, headers['cpf']],
+    #                                                                               df.loc[var.progress, headers['cnpj']],
+    #                                                                               df.loc[var.progress, headers['matr']],
+    #                                                                               df.loc[var.progress, headers['cobe']]))))
+    #
+    #     else:
+    #         processes.append(multiprocessing.Process(target=emit_multiple, args=((quotient,
+    #                                                                               df.loc[var.progress, headers['name']],
+    #                                                                               df.loc[var.progress, headers['cpf']],
+    #                                                                               df.loc[var.progress, headers['cnpj']],
+    #                                                                               df.loc[var.progress, headers['matr']],
+    #                                                                               df.loc[var.progress, headers['cobe']]))))
+    #
+    #     processes[i].start()
+    #
+    # for i in range(divisor):
+    #     processes[i].join()
+
+    threads = []
+
     if var.apolice:
-        while var.progress < len(df.index):
+        while var.progress < var.max_progress:
             if threading.active_count() < var.max_threads:
-                threading.Thread(target=emit_singular(df.loc[var.progress, headers['name']], df.loc[var.progress,
-                headers['cpf']], df.loc[var.progress, headers['cnpj']], df.loc[var.progress, headers['matr']],
-                                                      df.loc[var.progress, headers['cobe']], df.loc[var.progress,
-                    headers['apol']]), daemon=False).start()
+                threads.append(threading.Thread(target=emit_singular, args=(df.loc[var.progress, headers['name']], df.loc[var.progress,
+                headers['cpf']], df.loc[var.progress, headers['cnpj']], df.loc[var.progress,
+                headers['matr']], df.loc[var.progress, headers['cobe']], df.loc[var.progress, headers['apol']]), daemon=False))
+
+                threads[var.progress].start()
 
     else:
-        while var.progress < len(df.index):
+        while var.progress < var.max_progress:
+            print(threading.active_count(), var.max_threads)
             if threading.active_count() < var.max_threads:
-                threading.Thread(target=emit_singular(df.loc[var.progress, headers['name']], df.loc[var.progress,
+                threads.append(threading.Thread(target=emit_singular, args=(df.loc[var.progress, headers['name']], df.loc[var.progress,
                 headers['cpf']], df.loc[var.progress, headers['cnpj']], df.loc[var.progress, headers['matr']],
-                                                      df.loc[var.progress, headers['cobe']]), daemon=False).start()
+                                                      df.loc[var.progress, headers['cobe']]), daemon=False))
+
+                threads[var.progress].start()
 
     var.progress = 0
     var.emission_time = time.time() - start_time

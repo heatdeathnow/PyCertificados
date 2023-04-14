@@ -1,7 +1,7 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QMetaObject, QSize, QTime, Qt)
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QCheckBox, QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,
-                               QProgressBar, QPushButton,QSizePolicy, QTabWidget, QWidget, QFileDialog, QMessageBox)
+                               QProgressBar, QPushButton, QSizePolicy, QTabWidget, QWidget, QFileDialog, QMessageBox)
 from emitter import *
 import var
 import threading
@@ -541,7 +541,7 @@ class Ui_Widget(object):
 
     def update_progress_bar(self):
         while var.progress < var.max_progress:
-            self.progressBar.setValue(var.progress)
+            self.progressBar.setValue(100 * var.progress / var.max_progress)
             sleep(0.001)
 
         self.progressBar.setValue(0)
@@ -658,6 +658,5 @@ class Ui_Widget(object):
                 emit_singular(name, cpf, cnpj,  matr, cobe, apol)
             else:
                 emit_singular(name, cpf, cnpj, matr, cobe)
-
 
             self.success_label.setText(f'arquivo {var.progress} - {nm(name)} emitido com êxito.')

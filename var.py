@@ -1,7 +1,9 @@
 from time import time
+from multiprocessing import cpu_count
 
 data_dir = ''
 max_threads = 50
+max_processes = cpu_count()
 progress = 0
 max_progress = 1
 output_dir = ''
