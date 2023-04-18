@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QCheckBox, QDateEdit, QFrame, QGridLayout, QHBoxL
                                QProgressBar, QPushButton, QSizePolicy, QTabWidget, QWidget, QFileDialog, QMessageBox)
 from emitter import *
 import var
-import threading
+from threading import Thread
 from time import sleep
 from parser import name as nm
 from reader import get_coberturas
@@ -447,6 +447,8 @@ class Ui_Widget(object):
         self.apolice_singular_checkbutton.toggled.connect(self.toggle_apolice_singular)
         self.emit_button.released.connect(self.emit_singular)
         self.coberturas_list.itemSelectionChanged.connect(self.select_item)
+        self.start_date_singular_dateedit.dateChanged.connect(self.change_start_date_singular)
+        self.end_date_singular_dateedit.dateChanged.connect(self.change_end_date_singular)
 
         self.tabs.setCurrentIndex(0)
 
@@ -539,6 +541,28 @@ class Ui_Widget(object):
         var.end_period = day + '/' + mon + '/' + yea
         self.end_date_singular_dateedit.setDate(self.end_date_multiple_dateedit.date())
 
+    def change_start_date_singular(self):
+        day = str(self.start_date_singular_dateedit.date().day())
+        mon = str(self.start_date_singular_dateedit.date().month())
+        yea = str(self.start_date_singular_dateedit.date().year())
+
+        if len(day) < 2: day = '0' + day
+        if len(mon) < 2: mon = '0' + mon
+
+        var.start_period = day + '/' + mon + '/' + yea
+        self.start_date_multiple_dateedit.setDate(self.start_date_singular_dateedit.date())
+
+    def change_end_date_singular(self):
+        day = str(self.end_date_singular_dateedit.date().day())
+        mon = str(self.end_date_singular_dateedit.date().month())
+        yea = str(self.end_date_singular_dateedit.date().year())
+
+        if len(day) < 2: day = '0' + day
+        if len(mon) < 2: mon = '0' + mon
+
+        var.end_period = day + '/' + mon + '/' + yea
+        self.end_date_multiple_dateedit.setDate(self.end_date_singular_dateedit.date())
+
     def update_progress_bar(self):
         while var.progress < var.max_progress:
             self.progressBar.setValue(100 * var.progress / var.max_progress)
@@ -547,7 +571,8 @@ class Ui_Widget(object):
         self.progressBar.setValue(0)
 
     def emit_multiple(self):
-        progress_thread = threading.Thread(target=self.update_progress_bar, daemon=True)
+        var.progress = 0
+        progress_thread = Thread(target=self.update_progress_bar, daemon=True)
         progress_thread.start()
         emit_from_source()
 
@@ -655,7 +680,7 @@ class Ui_Widget(object):
 
         else:
             if var.apolice:
-                emit_singular(name, cpf, cnpj,  matr, cobe, apol)
+                emit_singular(name, cpf, cnpj, matr, cobe, apol)
             else:
                 emit_singular(name, cpf, cnpj, matr, cobe)
 
