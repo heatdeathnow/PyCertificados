@@ -1,6 +1,6 @@
-import sys
 from PySide6.QtWidgets import QApplication, QWidget
 from ui_form import Ui_Widget
+import sys
 
 
 class Widget(QWidget):

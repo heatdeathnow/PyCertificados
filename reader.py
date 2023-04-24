@@ -1,6 +1,6 @@
+from PySide6.QtWidgets import QMessageBox
 import pandas
 import var
-from PySide6.QtWidgets import QMessageBox
 
 
 def load(path, headers=True):
@@ -40,40 +40,46 @@ def get_headers(df):
     headers = {'name': '',
                'cpf' : '',
                'cnpj': '',
-               'apol': None,
+               'clie': '',
+               'apol': '',
                'matr': '',
                'cobe': ''}
 
     nome_found = False
     cpf_found  = False
     cnpj_found = False
+    clie_found = False
     apol_found = False
     matr_found = False
     cobe_found = False
 
     for column in df.columns:
 
-        if ('nome' in column.lower() or 'segurado' in column.lower()) and not nome_found:
+        if ('nome' in column.lower().strip() or 'segurado' in column.lower().strip()) and not nome_found:
             headers['name'] = column
             nome_found = True
 
-        elif 'cpf' in column.lower() and not cpf_found:
+        elif 'cpf' in column.lower().strip() and not cpf_found:
             headers['cpf'] = column
             cpf_found = True
 
-        elif 'cnpj' in column.lower() and not cnpj_found:
+        elif 'cnpj' in column.lower().strip() and not cnpj_found:
             headers['cnpj'] = column
             cnpj_found = True
 
-        elif ('matricula' in column.lower() or 'matrícula' in column.lower()) and not matr_found:
+        elif 'cliente' in column.lower().strip() and not clie_found:
+            headers['clie'] = column
+            clie_found = True
+
+        elif ('matricula' in column.lower().strip() or 'matrícula' in column.lower().strip()) and not matr_found:
             headers['matr'] = column
             matr_found = True
 
-        elif 'cobertura' in column.lower() and not cobe_found:
+        elif 'cobertura' in column.lower().strip() and not cobe_found:
             headers['cobe'] = column
             cobe_found = True
 
-        elif ('apolice' in column.lower() or 'apólice' in column.lower()) and var.apolice and not apol_found:
+        elif ('apolice' in column.lower().strip() or 'apólice' in column.lower().strip()) and not apol_found:
             headers['apol'] = column
             apol_found = True
 
@@ -94,6 +100,13 @@ def get_headers(df):
     if not any(headers['cnpj']):
         warning = QMessageBox()
         warning.setText('Campo "CNPJ" não foi encontrado na planilha')
+        warning.setIcon(QMessageBox.Icon.Warning)
+        warning.setWindowTitle('AVISO')
+        warning.exec()
+
+    if not any(headers['clie']):
+        warning = QMessageBox()
+        warning.setText('Campo "cliente" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
