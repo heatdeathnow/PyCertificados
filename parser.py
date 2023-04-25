@@ -14,7 +14,7 @@ def cpf(x):
         x = '0' * (11 - len(x)) + x
 
     elif len(x) > 11:
-        raise Exception(f'CPF {x} tem caracteres demais')
+        raise Exception(f'CPF "{x}" tem caracteres demais')
 
     # Formata e retorna o CPF.
     return x[:3] + '.' + x[3:6] + '.' + x[6:9] + '-' + x[9:]
@@ -32,7 +32,7 @@ def cnpj(x):
         x = x.replace('0', '', 1)
 
     else:
-        raise Exception(f'CNPJ {x} tem caracteres demais')
+        raise Exception(f'CNPJ "{x}" tem caracteres demais')
 
     # Formata e retorna o CNPJ.
     return x[:2] + '.' + x[2:5] + '.' + x[5:8] + '/' + x[8:12] + '-' + x[12:]
@@ -45,6 +45,18 @@ def matr(x):
         x = '0' * (6 - len(x)) + x
 
     elif len(x) > 6:
-        raise Exception(f'Matrícula {x} tem caracteres demais')
+        raise Exception(f'Matrícula "{x}" tem caracteres demais')
+
+    return x
+
+
+def cnv(x):
+    x = str(x)
+
+    if len(x) < 4:
+        x = '0' * (4 - len(x)) + x
+
+    elif len(x) > 4:
+        raise Exception(f'CNV "{x}" tem caracteres demais')
 
     return x

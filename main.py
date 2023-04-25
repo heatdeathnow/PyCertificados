@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QApplication, QWidget
 from ui_form import Ui_Widget
-import sys
-
+from sys import argv, exit
 
 class Widget(QWidget):
     def __init__(self, parent=None):
@@ -11,9 +10,9 @@ class Widget(QWidget):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
 
     widget = Widget()
     widget.setWindowTitle('Emissor de certificados')
     widget.show()
-    sys.exit(app.exec())
+    exit(app.exec())

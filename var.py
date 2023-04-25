@@ -1,9 +1,7 @@
-from multiprocessing import cpu_count
 from time import time
 
 data_dir = ''
 max_threads = 50
-max_processes = cpu_count()
 progress = 0
 max_progress = 1
 output_dir = ''
@@ -13,4 +11,5 @@ runtime = time()
 emission_time = 0
 certificates_per_second = 0
 coberturas_path = 'dados/coberturas.xlsx'
-template = "dados/modelo.pdf"
+template = 'dados/modelo.pdf'
+cnv_path = 'dados/cnv.xlsx'

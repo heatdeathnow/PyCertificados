@@ -475,9 +475,6 @@ class Ui_Widget(object):
         self.start_date_singular_dateedit.dateChanged.connect(self.change_start_date_singular)
         self.end_date_singular_dateedit.dateChanged.connect(self.change_end_date_singular)
 
-        self.tabs.setCurrentIndex(1)
-
-
         QMetaObject.connectSlotsByName(Widget)
     # setupUi
 
@@ -687,5 +684,5 @@ class Ui_Widget(object):
             warning.exec()
 
         else:
-            emit_singular(name, cpf, cnpj, clie, matr, cobe, apol)
+            emit_singular(name, cpf, cnpj, matr, clie, apol, cobe, cnv='')
             self.success_label.setText(f'arquivo {var.progress} - {nm(name)} emitido com êxito.')

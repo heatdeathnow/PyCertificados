@@ -1,16 +1,13 @@
 from PySide6.QtWidgets import QMessageBox
 import pandas
-import var
 
 
 def load(path, headers=True):
-
     if headers:
         if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
             return pandas.read_excel(path)
 
         elif path[-4:] == ".csv":
-
             return pandas.read_csv(path, sep=';')
 
     else:
@@ -18,8 +15,15 @@ def load(path, headers=True):
             return pandas.read_excel(path, header=None)
 
         elif path[-4:] == ".csv":
-
             return pandas.read_csv(path, sep=';', header=None)
+
+
+def get_cnv(path):
+    df = load(path)
+    df = df.set_index('CNV')
+    df = df.squeeze()
+
+    return df
 
 
 def get_coberturas(path):
@@ -40,18 +44,20 @@ def get_headers(df):
     headers = {'name': '',
                'cpf' : '',
                'cnpj': '',
+               'matr': '',
                'clie': '',
                'apol': '',
-               'matr': '',
-               'cobe': ''}
+               'cobe': '',
+               'cnv' : ''}
 
     nome_found = False
     cpf_found  = False
     cnpj_found = False
+    matr_found = False
     clie_found = False
     apol_found = False
-    matr_found = False
     cobe_found = False
+    cnv_found  = False
 
     for column in df.columns:
 
@@ -78,6 +84,10 @@ def get_headers(df):
         elif 'cobertura' in column.lower().strip() and not cobe_found:
             headers['cobe'] = column
             cobe_found = True
+
+        elif 'cnv' in column.lower().strip() and not cnv_found:
+            headers['cnv'] = column
+            cnv_found = True
 
         elif ('apolice' in column.lower().strip() or 'apólice' in column.lower().strip()) and not apol_found:
             headers['apol'] = column
@@ -118,14 +128,15 @@ def get_headers(df):
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['cobe']):
+    if not any(headers['cobe']) and not any(headers['cnv']):
         warning = QMessageBox()
-        warning.setText('Campo "cobertura" não foi encontrado na planilha')
+        warning.setText('Pelo menos uma das colunas deve existir na planilha:\n'
+                        '"CNV" ou "cobertura"')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if var.apolice and not any(headers['apol']):
+    if not any(headers['apol']):
         warning = QMessageBox()
         warning.setText('Campo "apolice" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
