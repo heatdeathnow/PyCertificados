@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QApplication, QWidget
 from ui_form import Ui_Widget
 from sys import argv, exit
 
+
 class Widget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)

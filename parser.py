@@ -51,7 +51,11 @@ def matr(x):
 
 
 def cnv(x):
-    x = str(x)
+
+    if x == 'GERENTES':
+        return x
+
+    x = str(int(x))
 
     if len(x) < 4:
         x = '0' * (4 - len(x)) + x

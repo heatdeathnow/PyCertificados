@@ -1,25 +1,26 @@
 from PySide6.QtWidgets import QMessageBox
 import pandas
+from var import chunk_size as cz
 
 
-def load(path, headers=True):
+def load(path, start_at=0, chunk_size=cz, headers=True, **kwargs):
     if headers:
         if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return pandas.read_excel(path)
+            return pandas.read_excel(path, skiprows=start_at, nrows=chunk_size, **kwargs)
 
         elif path[-4:] == ".csv":
-            return pandas.read_csv(path, sep=';')
+            return pandas.read_csv(path, skiprows=start_at, nrows=chunk_size, sep=';', **kwargs)
 
     else:
         if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return pandas.read_excel(path, header=None)
+            return pandas.read_excel(path, skiprows=start_at, nrows=chunk_size, header=None, **kwargs)
 
         elif path[-4:] == ".csv":
-            return pandas.read_csv(path, sep=';', header=None)
+            return pandas.read_csv(path, skiprows=start_at, nrows=chunk_size, sep=';', header=None, **kwargs)
 
 
 def get_cnv(path):
-    df = load(path)
+    df = load(path, 0, 1000)
     df = df.set_index('CNV')
     df = df.squeeze()
 
@@ -27,7 +28,7 @@ def get_cnv(path):
 
 
 def get_coberturas(path):
-    df = load(path, False)
+    df = load(path, 0, 1, False)
     df.columns = df.iloc[0]
     cobe = []
 
@@ -62,73 +63,73 @@ def get_headers(df):
     for column in df.columns:
 
         if ('nome' in column.lower().strip() or 'segurado' in column.lower().strip()) and not nome_found:
-            headers['name'] = column
+            headers['name'] = df.columns.get_loc(column)
             nome_found = True
 
         elif 'cpf' in column.lower().strip() and not cpf_found:
-            headers['cpf'] = column
+            headers['cpf'] = df.columns.get_loc(column)
             cpf_found = True
 
         elif 'cnpj' in column.lower().strip() and not cnpj_found:
-            headers['cnpj'] = column
+            headers['cnpj'] = df.columns.get_loc(column)
             cnpj_found = True
 
         elif 'cliente' in column.lower().strip() and not clie_found:
-            headers['clie'] = column
+            headers['clie'] = df.columns.get_loc(column)
             clie_found = True
 
         elif ('matricula' in column.lower().strip() or 'matrícula' in column.lower().strip()) and not matr_found:
-            headers['matr'] = column
+            headers['matr'] = df.columns.get_loc(column)
             matr_found = True
 
         elif 'cobertura' in column.lower().strip() and not cobe_found:
-            headers['cobe'] = column
+            headers['cobe'] = df.columns.get_loc(column)
             cobe_found = True
 
         elif 'cnv' in column.lower().strip() and not cnv_found:
-            headers['cnv'] = column
+            headers['cnv'] = df.columns.get_loc(column)
             cnv_found = True
 
         elif ('apolice' in column.lower().strip() or 'apólice' in column.lower().strip()) and not apol_found:
-            headers['apol'] = column
+            headers['apol'] = df.columns.get_loc(column)
             apol_found = True
 
-    if not any(headers['name']):
+    if headers['name'] == '':
         warning = QMessageBox()
         warning.setText('Campo "nome" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['cpf']):
+    if headers['cpf'] == '':
         warning = QMessageBox()
         warning.setText('Campo "CPF" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['cnpj']):
+    if headers['cnpj'] == '':
         warning = QMessageBox()
         warning.setText('Campo "CNPJ" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['clie']):
+    if headers['clie'] == '':
         warning = QMessageBox()
         warning.setText('Campo "cliente" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['matr']):
+    if headers['matr'] == '':
         warning = QMessageBox()
         warning.setText('Campo "matricula" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['cobe']) and not any(headers['cnv']):
+    if headers['cobe'] == '' and headers['cnv'] == '':
         warning = QMessageBox()
         warning.setText('Pelo menos uma das colunas deve existir na planilha:\n'
                         '"CNV" ou "cobertura"')
@@ -136,7 +137,7 @@ def get_headers(df):
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    if not any(headers['apol']):
+    if headers['apol'] == '':
         warning = QMessageBox()
         warning.setText('Campo "apolice" não foi encontrado na planilha')
         warning.setIcon(QMessageBox.Icon.Warning)

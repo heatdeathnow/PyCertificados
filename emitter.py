@@ -1,8 +1,7 @@
 from reportlab.pdfgen.canvas import Canvas
-from threading import active_count, Thread
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
-from time import time, sleep
+from time import time
 from pdfrw import PdfReader
 from textwrap import wrap
 from reader import *
@@ -47,47 +46,55 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, cobe='', cnv=''):
 
 def emit_from_source():
     start_time = time()
-    df = load(var.data_dir)
-    headers = get_headers(df)
+
+    headers = get_headers(load(var.data_dir, 0, 1))
+    headers_load_time = time() - start_time
+    print(f'Tempo de carregamento de headers: {headers_load_time / 60} minutos')
+    
     cnv = get_cnv(var.cnv_path)
-    var.max_progress = len(df.index)
+    var.max_progress = 0
 
-    threads = []
+    i = 0
+    while True:
+        
+        data_chunk_load_start = time()
+        data_chunk = load(var.data_dir, i * var.chunk_size)
+        data_chunk_load_time = time() - data_chunk_load_start
+        print(f'\nTempo de carregamento de {i + 1}º datachunk: {data_chunk_load_time / 60} minutos')
 
-    while var.progress < var.max_progress:
-        if active_count() < var.max_threads:
+        var.max_progress += len(data_chunk.index)
+
+        j = 0
+        while j < len(data_chunk.index):
             if headers['cobe'] != '':
-                threads.append(Thread(target=emit_singular, args=(df.loc[var.progress, headers['name']],
-                                                                  df.loc[var.progress, headers['cpf' ]],
-                                                                  df.loc[var.progress, headers['cnpj']],
-                                                                  df.loc[var.progress, headers['matr']],
-                                                                  df.loc[var.progress, headers['clie']],
-                                                                  df.loc[var.progress, headers['apol']],
-                                                                  df.loc[var.progress, headers['cobe']],
-                                                                  ''),
-                                      daemon=False))
-
-                threads[var.progress].start()
+                emit_singular(data_chunk.iloc[j, headers['name']],
+                              data_chunk.iloc[j, headers['cpf' ]],
+                              data_chunk.iloc[j, headers['cnpj']],
+                              data_chunk.iloc[j, headers['matr']],
+                              data_chunk.iloc[j, headers['clie']],
+                              data_chunk.iloc[j, headers['apol']],
+                              data_chunk.iloc[j, headers['cobe']],
+                              '')
 
             else:
-                threads.append(Thread(target=emit_singular, args=(df.loc[var.progress, headers['name']],
-                                                                  df.loc[var.progress, headers['cpf']],
-                                                                  df.loc[var.progress, headers['cnpj']],
-                                                                  df.loc[var.progress, headers['matr']],
-                                                                  df.loc[var.progress, headers['clie']],
-                                                                  df.loc[var.progress, headers['apol']],
-                                                                  '',
-                                                                  cnv.loc[parser.cnv(df.loc[var.progress, headers['cnv']])]),
-                                      daemon=False))
+                emit_singular(data_chunk.iloc[j, headers['name']],
+                              data_chunk.iloc[j, headers['cpf' ]],
+                              data_chunk.iloc[j, headers['cnpj']],
+                              data_chunk.iloc[j, headers['matr']],
+                              data_chunk.iloc[j, headers['clie']],
+                              data_chunk.iloc[j, headers['apol']],
+                              '',
+                              cnv.loc[parser.cnv(data_chunk.iloc[j, headers['cnv']])])
 
-                threads[var.progress].start()
+            j += 1
+            print(f'Progresso: {var.progress} / {var.max_progress} | minuto {(time() - start_time) / 60}')
 
-        else:
-            sleep(0.001)
+        if len(data_chunk.index) < var.chunk_size:
+            break
+        i += 1
 
-    for thread in threads:
-        thread.join()
+        del data_chunk
 
     var.progress = 0
     var.emission_time = time() - start_time
-    var.certificates_per_second = len(df.index) / var.emission_time
+    var.certificates_per_second = var.max_progress / var.emission_time

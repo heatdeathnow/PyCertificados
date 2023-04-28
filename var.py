@@ -1,7 +1,7 @@
 from time import time
 
 data_dir = ''
-max_threads = 50
+max_threads = 10
 progress = 0
 max_progress = 1
 output_dir = ''
@@ -13,3 +13,4 @@ certificates_per_second = 0
 coberturas_path = 'dados/coberturas.xlsx'
 template = 'dados/modelo.pdf'
 cnv_path = 'dados/cnv.xlsx'
+chunk_size = 1000
