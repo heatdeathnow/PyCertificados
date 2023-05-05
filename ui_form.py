@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLab
 from PySide6.QtGui import QIcon
 from emitter import emit_singular, emit_from_source
 from reader import get_coberturas
-from parser import name as nm
+from neat import name as nm
 from threading import Thread
 from time import sleep
 import var
@@ -572,18 +572,30 @@ class Ui_Widget(object):
     def update_progress_bar(self):
         while var.progress < var.max_progress:
             self.progressBar.setValue(100 * var.progress / var.max_progress)
-            sleep(0.01)
+            sleep(0.001)
+
+        while var.certificates_per_second == 0 or var.emission_time == 0:
+            sleep(0.001)
 
         self.progressBar.setValue(0)
-
-    def emit_multiple(self):
-        var.progress = 0
-        progress_thread = Thread(target=self.update_progress_bar, daemon=True)
-        progress_thread.start()
-        emit_from_source()
+        self.emission_button.setEnabled(True)
+        self.emit_button.setEnabled(True)
 
         self.speed_label.setText(f"{var.certificates_per_second:.2f} certificados por segundo")
-        self.time_label.setText(f"{var.emission_time:.2f} segundos")
+        self.time_label.setText(f"{var.emission_time / 60:.2f} minutos")
+        var.certificates_per_second == 0
+        var.emission_time == 0
+
+    def emit_multiple(self):
+
+        self.emission_button.setEnabled(False)
+        self.emit_button.setEnabled(False)
+
+        progress_thread = Thread(target=self.update_progress_bar, daemon=True)
+        emission_thread = Thread(target=emit_from_source)
+
+        progress_thread.start()
+        emission_thread.start()
 
     def select_item(self):
         self.cobertura_label.setText(self.coberturas_list.selectedItems()[0].text())

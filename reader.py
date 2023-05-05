@@ -1,34 +1,73 @@
 from PySide6.QtWidgets import QMessageBox
+from multiprocessing import Process
+from time import time
 import pandas
-from var import chunk_size as cz
 
 
-def load(path, start_at=0, chunk_size=cz, headers=True, **kwargs):
+# Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
+def load(path, headers=True, **kwargs):
     if headers:
         if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return pandas.read_excel(path, skiprows=start_at, nrows=chunk_size, **kwargs)
+            return pandas.read_excel(path, **kwargs)
 
         elif path[-4:] == ".csv":
-            return pandas.read_csv(path, skiprows=start_at, nrows=chunk_size, sep=';', **kwargs)
+            return pandas.read_csv(path, sep=';', **kwargs)
 
     else:
         if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return pandas.read_excel(path, skiprows=start_at, nrows=chunk_size, header=None, **kwargs)
+            return pandas.read_excel(path, header=None, **kwargs)
 
         elif path[-4:] == ".csv":
-            return pandas.read_csv(path, skiprows=start_at, nrows=chunk_size, sep=';', header=None, **kwargs)
+            return pandas.read_csv(path, sep=';', header=None, **kwargs)
 
 
+# Função load usada exclusivamente para multiprocessamento. Em vez de retornar o valor, ele o salva numa variável multiprocessamento no módulo var.
+class SubLoader(Process):
+    def __init__(self, path, skiprows, nrows, i, mlist, lock, headers=False):
+        super().__init__()
+        self.path = path
+        self.skiprows = skiprows
+        self.nrows = nrows
+        self.i = i
+        self.list = mlist
+        self.headers = headers
+        self.lock = lock
+        self.loadtime = time()
+
+    def run(self):
+        if self.headers:
+            if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
+                with self.lock:
+                    self.list[self.i] = pandas.read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows)
+
+            elif self.path[-4:] == ".csv":
+                with self.lock:
+                    self.list[self.i] = pandas.read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';')
+
+        else:
+            if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
+                with self.lock:
+                    self.list[self.i] = pandas.read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows, header=None)
+
+            elif self.path[-4:] == ".csv":
+                with self.lock:
+                    self.list[self.i] = pandas.read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';', header=None)
+
+        print(f'Tempo levado para o {self.i}º processo carregar {self.nrows} linhas na memória: {(time() - self.loadtime):.2f} segundos.')
+
+
+# Lê todos os códigos de cobertura num arquivo externo e retorna a relação cifras-coberturas num dataframe (usado para a emissão de múltiplos certificados).
 def get_cnv(path):
-    df = load(path, 0, 1000)
+    df = load(path)
     df = df.set_index('CNV')
     df = df.squeeze()
 
     return df
 
 
+# Lê um arquivo externo com todas as possibilidades de coberturas (usado para a emissão de certificados individuais).
 def get_coberturas(path):
-    df = load(path, 0, 1, False)
+    df = load(path, False)
     df.columns = df.iloc[0]
     cobe = []
 
@@ -41,7 +80,11 @@ def get_coberturas(path):
     return cobe
 
 
-def get_headers(df):
+# Função que olha todos os cabeçários da planilha e compara seus nomes com palavras-chaves. Usado para descobrir onde estão os dados que serão usados numa planilha desconhecida.
+def get_headers(path):
+
+    df = load(path, nrows=1)
+
     headers = {'name': '',
                'cpf' : '',
                'cnpj': '',
@@ -51,6 +94,7 @@ def get_headers(df):
                'cobe': '',
                'cnv' : ''}
 
+    # Depois que encontrar tal palavra-chave, ele não a substituirá se achar outra instância dela.
     nome_found = False
     cpf_found  = False
     cnpj_found = False
@@ -144,4 +188,4 @@ def get_headers(df):
         warning.setWindowTitle('AVISO')
         warning.exec()
 
-    return headers
+    return headers  # Retorna um dicionário contendo os índices das colunas que contém os dados que serão usados.
