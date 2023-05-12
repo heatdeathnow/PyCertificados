@@ -1,24 +1,8 @@
 from PySide6.QtWidgets import QMessageBox
+from pandas import read_excel, read_csv
 from multiprocessing import Process
 from time import time
-import pandas
-
-
-# Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
-def load(path, headers=True, **kwargs):
-    if headers:
-        if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return pandas.read_excel(path, **kwargs)
-
-        elif path[-4:] == ".csv":
-            return pandas.read_csv(path, sep=';', **kwargs)
-
-    else:
-        if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return pandas.read_excel(path, header=None, **kwargs)
-
-        elif path[-4:] == ".csv":
-            return pandas.read_csv(path, sep=';', header=None, **kwargs)
+import var
 
 
 # Função load usada exclusivamente para multiprocessamento. Em vez de retornar o valor, ele o salva numa variável multiprocessamento no módulo var.
@@ -38,22 +22,39 @@ class SubLoader(Process):
         if self.headers:
             if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
                 with self.lock:
-                    self.list[self.i] = pandas.read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows)
+                    self.list[self.i] = read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows)
 
             elif self.path[-4:] == ".csv":
                 with self.lock:
-                    self.list[self.i] = pandas.read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';')
+                    self.list[self.i] = read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';')
 
         else:
             if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
                 with self.lock:
-                    self.list[self.i] = pandas.read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows, header=None)
+                    self.list[self.i] = read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows, header=None)
 
             elif self.path[-4:] == ".csv":
                 with self.lock:
-                    self.list[self.i] = pandas.read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';', header=None)
+                    self.list[self.i] = read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';', header=None)
 
-        print(f'Tempo levado para o {self.i}º processo carregar {self.nrows} linhas na memória: {(time() - self.loadtime):.2f} segundos.')
+        print(f'Tempo levado para o {self.i + 1}º processo carregar {len(self.list[self.i].index)} linhas na memória: {(time() - self.loadtime):.2f} segundos.')
+
+
+# Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
+def load(path, headers=True, **kwargs):
+    if headers:
+        if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
+            return read_excel(path, **kwargs)
+
+        elif path[-4:] == ".csv":
+            return read_csv(path, sep=';', **kwargs)
+
+    else:
+        if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
+            return read_excel(path, header=None, **kwargs)
+
+        elif path[-4:] == ".csv":
+            return read_csv(path, sep=';', header=None, **kwargs)
 
 
 # Lê todos os códigos de cobertura num arquivo externo e retorna a relação cifras-coberturas num dataframe (usado para a emissão de múltiplos certificados).
@@ -82,7 +83,6 @@ def get_coberturas(path):
 
 # Função que olha todos os cabeçários da planilha e compara seus nomes com palavras-chaves. Usado para descobrir onde estão os dados que serão usados numa planilha desconhecida.
 def get_headers(path):
-
     df = load(path, nrows=1)
 
     headers = {'name': '',
@@ -189,3 +189,22 @@ def get_headers(path):
         warning.exec()
 
     return headers  # Retorna um dicionário contendo os índices das colunas que contém os dados que serão usados.
+
+
+def save_configs():
+    with open('dados/configs', 'w') as file:
+
+        rows = [
+            f'n_threads   ;{var.max_threads}\n',
+            f'n_processes ;{var.max_processes}\n',
+            f'n_target    ;{var.target_threads}\n',
+            f'data_dir    ;{var.data_dir}\n',
+            f'output_dir  ;{var.output_dir}\n',
+            f'start_date  ;{var.start_period}\n',
+            f'end_date    ;{var.end_period}\n',
+            f'cobertura   ;{var.coberturas_path}\n',
+            f'cnv         ;{var.cnv_path}\n',
+            f'template    ;{var.template}',
+        ]
+
+        file.writelines(rows)

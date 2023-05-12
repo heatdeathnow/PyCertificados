@@ -1,17 +1,18 @@
-from threading import Thread
+from threading import active_count, Thread
 from reportlab.pdfgen.canvas import Canvas
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
 from openpyxl import load_workbook
+from threading import Thread
 from time import time, sleep
 from pdfrw import PdfReader
 from textwrap import wrap
+from pandas import concat
+from math import floor
 from reader import *
 import neat
 import var
-from pandas import concat
-from math import floor
-from threading import active_count, Thread
+
 
 template = PdfReader(var.template, decompress=False)
 template_obj = pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
@@ -71,13 +72,13 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
 
     for i in range(var.max_processes):
         if i == range(var.max_processes)[-1]:  # Se estiver na última iteração, dê a sobra de linhas para o último processo.
-            processes.append(SubLoader(var.data_dir, i * quotient, quotient + remainder, i, var.shared_list, var.lock))
+            processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient + remainder, i, var.shared_list, var.lock))
         
-        elif i == 0:  # Ignorar a primeira linha (cabeçários) no caso do começo da planilha
+        elif i == 0:  # Primeira linha. Em todos os casos deve-se adicionar mais 1, pois senão há overlapping
             processes.append(SubLoader(var.data_dir, 1, quotient, i, var.shared_list, var.lock))
 
         else:  # Senão, dê apenas o quociente da divisão para esses processos que não são o último.
-            processes.append(SubLoader(var.data_dir, i * quotient, quotient, i, var.shared_list, var.lock))
+            processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient, i, var.shared_list, var.lock))
 
         processes[i].start()
 
@@ -87,7 +88,7 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     headers = get_headers(var.data_dir)  # Obtém a posição de cada coluna de dados importantes na planilha.
 
     df = concat(var.shared_list[:], ignore_index=True)  # Junta todas as partes num inteiro.
-    for chunk in var.shared_list: del chunk  # Deleta os fragmentos de dados depois de serem utilizados.
+    var.shared_list = var.manager.list(range(var.max_processes))  # Deleta os fragmentos de dados depois de serem utilizados.
 
     threads = []
     emit_time = time()  # Usado para calcular o tempo total e velocidade média do processo de emissão.
@@ -95,43 +96,64 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     # Usados para calcular velocidade marginal.
     marginal_time = time()
     marginal_cert = 0
-    while var.progress < var.max_progress:   
+    j = 0
+
+    while j < var.max_progress:
+        needed = var.target_threads - active_count()  # Três threads estão sempre ativas: (MainThread, update_progressbar_daemon, e emit_from_source) por isso a opção mínima é quatro.
+        if j + needed > var.max_progress:
+            needed = var.max_progress - j
+
+        elif needed <= 0:
+            needed = 1
+
         if headers['cobe'] != '' and active_count() < var.max_threads:
-            threads.append(Thread(target=emit_singular, args=(df.iloc[var.progress, headers['name']],
-                                                              df.iloc[var.progress, headers['cpf' ]],
-                                                              df.iloc[var.progress, headers['cnpj']],
-                                                              df.iloc[var.progress, headers['matr']],
-                                                              df.iloc[var.progress, headers['clie']],
-                                                              df.iloc[var.progress, headers['apol']],
-                                                              df.iloc[var.progress, headers['cobe']],
-                                                              '')))
-            threads[-1].start()
+            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, headers['name']],
+                                                              df.iloc[i, headers['cpf' ]],
+                                                              df.iloc[i, headers['cnpj']],
+                                                              df.iloc[i, headers['matr']],
+                                                              df.iloc[i, headers['clie']],
+                                                              df.iloc[i, headers['apol']],
+                                                              df.iloc[i, headers['cobe']],
+                                                              ''
+                                                              )) for i in range(j, j + needed))
+
+            for i in range(1, needed + 1):
+                threads[-i].start()
+            j += needed
 
         elif active_count() < var.max_threads:
-            threads.append(Thread(target=emit_singular, args=(df.iloc[var.progress, headers['name']],
-                                                              df.iloc[var.progress, headers['cpf' ]],
-                                                              df.iloc[var.progress, headers['cnpj']],
-                                                              df.iloc[var.progress, headers['matr']],
-                                                              df.iloc[var.progress, headers['clie']],
-                                                              df.iloc[var.progress, headers['apol']],
+            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, headers['name']],
+                                                              df.iloc[i, headers['cpf' ]],
+                                                              df.iloc[i, headers['cnpj']],
+                                                              df.iloc[i, headers['matr']],
+                                                              df.iloc[i, headers['clie']],
+                                                              df.iloc[i, headers['apol']],
                                                               '',
-                                                              cnv.loc[neat.cnv(df.iloc[var.progress, headers['cnv']])])))
-            threads[-1].start()
+                                                              cnv.loc[neat.cnv(df.iloc[i, headers['cnv']])]
+                                                              )) for i in range(j, j + needed))
+
+            for i in range(1, needed + 1):
+                threads[-i].start()
+            j += needed
 
         else:
             sleep(0.001)
 
         if marginal_cert != var.progress:
-            print(f'Velocidade marginal: {(var.progress - marginal_cert) / (time() - marginal_time):06.2f} certificados por segundo. | Threads ativas: {active_count()}.')
+            try:
+                print(f'Velocidade marginal: {(var.progress - marginal_cert) / (time() - marginal_time):07.2f} certificados por segundo. | Threads ativas: {active_count():03}. | Progresso: {var.progress:04} de {var.max_progress:04}. | j: {j:04}. | needed: {needed}')
+            except ZeroDivisionError:
+                print(f'Velocidade marginal: 9999.99 certificados por segundo. | Threads ativas: {active_count():03}. | Progresso: {var.progress:04} de {var.max_progress:04}. | j: {j:04}.')
             marginal_time = time()
             marginal_cert = var.progress
 
     for thread in threads:
         thread.join()
 
-    print(f'Tempo levado para salvar {var.max_progress} arquivos PDF da memória para o disco: {(time() - emit_time) / 60:.2f} minutos')
-
     del df
     var.progress = 0
     var.emission_time = time() - start_time
     var.certificates_per_second = var.max_progress / var.emission_time
+
+    print(f'Tempo levado para salvar {var.max_progress} arquivos PDF da memória para o disco: {(time() - emit_time) / 60:.2f} minutos')
+    print(f'Velocidade média: {var.certificates_per_second:.2f}')

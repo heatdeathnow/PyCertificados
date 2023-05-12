@@ -1,595 +1,804 @@
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QMetaObject, QSize, QTime, Qt)
-from PySide6.QtWidgets import (QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLabel, QLayout,
-                               QLineEdit, QListWidget, QProgressBar, QPushButton, QSizePolicy, QTabWidget,
-                               QWidget, QMessageBox, QFileDialog, QVBoxLayout)
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import (QCoreApplication, QDate, QMetaObject, QSize, Qt)
+from PySide6.QtWidgets import (QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,
+                               QProgressBar, QPushButton, QSizePolicy, QTabWidget, QWidget, QMessageBox, QFileDialog,
+                               QVBoxLayout, QFormLayout, QSlider)
 from emitter import emit_singular, emit_from_source
-from reader import get_coberturas
-from neat import name as nm
+from reader import get_coberturas, save_configs
+from multiprocessing import cpu_count
+from PySide6.QtGui import QIcon
 from threading import Thread
+from neat import name as nm
+from neat import cpf as cp
 from time import sleep
 import var
 
 
-class Ui_Widget(object):
-    def setupUi(self, Widget):
-        if not Widget.objectName():
-            Widget.setObjectName("Widget")
-        Widget.setWindowModality(Qt.NonModal)
-        Widget.resize(600, 436)
-        Widget.setWindowIcon(QIcon('dados/ícone.ico'))
-        self.gridLayout = QGridLayout(Widget)
-        self.gridLayout.setObjectName("gridLayout")
-        self.tabs = QTabWidget(Widget)
-        self.tabs.setObjectName("tabs")
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        if not MainWindow.objectName():
+            MainWindow.setObjectName(u"MainWindow")
+        MainWindow.resize(780, 540)
+        MainWindow.setDocumentMode(False)
+        self.centralwidget = QWidget(MainWindow)
+        self.centralwidget.setObjectName(u"centralwidget")
+        self.verticalLayout = QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.tabWidget = QTabWidget(self.centralwidget)
+        self.tabWidget.setObjectName(u"tabWidget")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tabs.sizePolicy().hasHeightForWidth())
-        self.tabs.setSizePolicy(sizePolicy)
-        self.tabs.setTabPosition(QTabWidget.North)
-        self.tabs.setTabShape(QTabWidget.Rounded)
-        self.tabs.setElideMode(Qt.ElideNone)
-        self.tabs.setDocumentMode(False)
-        self.tabs.setTabsClosable(False)
-        self.tabs.setMovable(False)
-        self.tabs.setTabBarAutoHide(False)
-        self.multiple_tab = QWidget()
-        self.multiple_tab.setObjectName("multiple_tab")
-        self.gridLayout_3 = QGridLayout(self.multiple_tab)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.gridLayout_3.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.progressBar = QProgressBar(self.multiple_tab)
-        self.progressBar.setObjectName("progressBar")
-        self.progressBar.setValue(0)
-        self.progressBar.setTextVisible(False)
-
-        self.gridLayout_3.addWidget(self.progressBar, 4, 0, 1, 1)
-
-        self.input_layout = QHBoxLayout()
-        self.input_layout.setObjectName("input_layout")
-        self.input_button = QPushButton(self.multiple_tab)
-        self.input_button.setObjectName("input_button")
-        self.input_button.setMinimumSize(QSize(160, 30))
-
-        self.input_layout.addWidget(self.input_button)
-
-        self.input_header_label = QLabel(self.multiple_tab)
-        self.input_header_label.setObjectName("input_header_label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        sizePolicy.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
+        self.tabWidget.setSizePolicy(sizePolicy)
+        self.tabWidget.setMinimumSize(QSize(0, 30))
+        self.tab_multiple = QWidget()
+        self.tab_multiple.setObjectName(u"tab_multiple")
+        self.gridLayout = QGridLayout(self.tab_multiple)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.verticalLayout_multiple_select = QVBoxLayout()
+        self.verticalLayout_multiple_select.setObjectName(u"verticalLayout_multiple_select")
+        self.pushButton_multiple_input = QPushButton(self.tab_multiple)
+        self.pushButton_multiple_input.setObjectName(u"pushButton_multiple_input")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.input_header_label.sizePolicy().hasHeightForWidth())
-        self.input_header_label.setSizePolicy(sizePolicy1)
+        sizePolicy1.setHeightForWidth(self.pushButton_multiple_input.sizePolicy().hasHeightForWidth())
+        self.pushButton_multiple_input.setSizePolicy(sizePolicy1)
+        self.pushButton_multiple_input.setMinimumSize(QSize(0, 40))
+        self.pushButton_multiple_input.setMaximumSize(QSize(150, 16777215))
 
-        self.input_layout.addWidget(self.input_header_label)
+        self.verticalLayout_multiple_select.addWidget(self.pushButton_multiple_input)
 
-        self.input_label = QLabel(self.multiple_tab)
-        self.input_label.setObjectName("input_label")
-        sizePolicy2 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Maximum)
+        self.label_multiple_input_header = QLabel(self.tab_multiple)
+        self.label_multiple_input_header.setObjectName(u"label_multiple_input_header")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.input_label.sizePolicy().hasHeightForWidth())
-        self.input_label.setSizePolicy(sizePolicy2)
-        self.input_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        sizePolicy2.setHeightForWidth(self.label_multiple_input_header.sizePolicy().hasHeightForWidth())
+        self.label_multiple_input_header.setSizePolicy(sizePolicy2)
 
-        self.input_layout.addWidget(self.input_label)
+        self.verticalLayout_multiple_select.addWidget(self.label_multiple_input_header)
 
+        self.label_multiple_input_text = QLabel(self.tab_multiple)
+        self.label_multiple_input_text.setObjectName(u"label_multiple_input_text")
+        sizePolicy1.setHeightForWidth(self.label_multiple_input_text.sizePolicy().hasHeightForWidth())
+        self.label_multiple_input_text.setSizePolicy(sizePolicy1)
 
-        self.gridLayout_3.addLayout(self.input_layout, 0, 0, 1, 1)
+        self.verticalLayout_multiple_select.addWidget(self.label_multiple_input_text)
 
-        self.date_layout = QHBoxLayout()
-        self.date_layout.setObjectName("date_layout")
-        self.start_date_layout = QHBoxLayout()
-        self.start_date_layout.setObjectName("start_date_layout")
-        self.start_date_label = QLabel(self.multiple_tab)
-        self.start_date_label.setObjectName("start_date_label")
-        sizePolicy1.setHeightForWidth(self.start_date_label.sizePolicy().hasHeightForWidth())
-        self.start_date_label.setSizePolicy(sizePolicy1)
+        self.line_multiple_input_output = QFrame(self.tab_multiple)
+        self.line_multiple_input_output.setObjectName(u"line_multiple_input_output")
+        self.line_multiple_input_output.setFrameShape(QFrame.HLine)
+        self.line_multiple_input_output.setFrameShadow(QFrame.Sunken)
 
-        self.start_date_layout.addWidget(self.start_date_label)
+        self.verticalLayout_multiple_select.addWidget(self.line_multiple_input_output)
 
-        self.start_date_multiple_dateedit = QDateEdit(self.multiple_tab)
-        self.start_date_multiple_dateedit.setObjectName("start_date_multiple_dateedit")
-        self.start_date_multiple_dateedit.setDateTime(QDateTime(QDate(2023, 1, 13), QTime(0, 0, 0)))
-        self.start_date_multiple_dateedit.setTime(QTime(0, 0, 0))
-        self.start_date_multiple_dateedit.setMaximumDate(QDate(2023, 12, 31))
-        self.start_date_multiple_dateedit.setMinimumDate(QDate(2023, 1, 13))
-        self.start_date_multiple_dateedit.setCalendarPopup(True)
+        self.pushButton_multiple_output = QPushButton(self.tab_multiple)
+        self.pushButton_multiple_output.setObjectName(u"pushButton_multiple_output")
+        self.pushButton_multiple_output.setMinimumSize(QSize(0, 40))
+        self.pushButton_multiple_output.setMaximumSize(QSize(150, 16777215))
+        self.pushButton_multiple_output.setAcceptDrops(False)
+        self.pushButton_multiple_output.setAutoFillBackground(False)
+        self.pushButton_multiple_output.setAutoDefault(False)
+        self.pushButton_multiple_output.setFlat(False)
 
-        self.start_date_layout.addWidget(self.start_date_multiple_dateedit)
+        self.verticalLayout_multiple_select.addWidget(self.pushButton_multiple_output)
 
+        self.label_multiple_output_header = QLabel(self.tab_multiple)
+        self.label_multiple_output_header.setObjectName(u"label_multiple_output_header")
+        sizePolicy2.setHeightForWidth(self.label_multiple_output_header.sizePolicy().hasHeightForWidth())
+        self.label_multiple_output_header.setSizePolicy(sizePolicy2)
 
-        self.date_layout.addLayout(self.start_date_layout)
+        self.verticalLayout_multiple_select.addWidget(self.label_multiple_output_header)
 
-        self.end_date_layout = QHBoxLayout()
-        self.end_date_layout.setObjectName("end_date_layout")
-        self.end_date_label = QLabel(self.multiple_tab)
-        self.end_date_label.setObjectName("end_date_label")
-        sizePolicy1.setHeightForWidth(self.end_date_label.sizePolicy().hasHeightForWidth())
-        self.end_date_label.setSizePolicy(sizePolicy1)
+        self.label_multiple_output_text = QLabel(self.tab_multiple)
+        self.label_multiple_output_text.setObjectName(u"label_multiple_output_text")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.label_multiple_output_text.sizePolicy().hasHeightForWidth())
+        self.label_multiple_output_text.setSizePolicy(sizePolicy3)
 
-        self.end_date_layout.addWidget(self.end_date_label)
-
-        self.end_date_multiple_dateedit = QDateEdit(self.multiple_tab)
-        self.end_date_multiple_dateedit.setObjectName("end_date_multiple_dateedit")
-        self.end_date_multiple_dateedit.setDateTime(QDateTime(QDate(2023, 1, 13), QTime(0, 0, 0)))
-        self.end_date_multiple_dateedit.setTime(QTime(0, 0, 0))
-        self.end_date_multiple_dateedit.setMaximumDate(QDate(2023, 12, 31))
-        self.end_date_multiple_dateedit.setMinimumDate(QDate(2023, 1, 13))
-        self.end_date_multiple_dateedit.setCalendarPopup(True)
-
-        self.end_date_layout.addWidget(self.end_date_multiple_dateedit)
+        self.verticalLayout_multiple_select.addWidget(self.label_multiple_output_text)
 
 
-        self.date_layout.addLayout(self.end_date_layout)
+        self.gridLayout.addLayout(self.verticalLayout_multiple_select, 0, 0, 1, 1)
+
+        self.horizontalLayout_multiple_bar_emit = QHBoxLayout()
+        self.horizontalLayout_multiple_bar_emit.setObjectName(u"horizontalLayout_multiple_bar_emit")
+        self.progressBar_multiple = QProgressBar(self.tab_multiple)
+        self.progressBar_multiple.setObjectName(u"progressBar_multiple")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.progressBar_multiple.sizePolicy().hasHeightForWidth())
+        self.progressBar_multiple.setSizePolicy(sizePolicy4)
+        self.progressBar_multiple.setValue(0)
+        self.progressBar_multiple.setTextVisible(False)
+        self.progressBar_multiple.setInvertedAppearance(False)
+
+        self.horizontalLayout_multiple_bar_emit.addWidget(self.progressBar_multiple)
+
+        self.pushButton_multiple_emit = QPushButton(self.tab_multiple)
+        self.pushButton_multiple_emit.setObjectName(u"pushButton_multiple_emit")
+
+        self.horizontalLayout_multiple_bar_emit.addWidget(self.pushButton_multiple_emit)
 
 
-        self.gridLayout_3.addLayout(self.date_layout, 2, 0, 1, 1)
+        self.gridLayout.addLayout(self.horizontalLayout_multiple_bar_emit, 2, 0, 1, 2)
 
-        self.output_multiple_layout = QHBoxLayout()
-        self.output_multiple_layout.setObjectName("output_multiple_layout")
-        self.output_multiple_button = QPushButton(self.multiple_tab)
-        self.output_multiple_button.setObjectName("output_multiple_button")
-        self.output_multiple_button.setMinimumSize(QSize(160, 30))
+        self.verticalLayout_multiple_dates = QVBoxLayout()
+        self.verticalLayout_multiple_dates.setObjectName(u"verticalLayout_multiple_dates")
+        self.label_multiple_start = QLabel(self.tab_multiple)
+        self.label_multiple_start.setObjectName(u"label_multiple_start")
+        sizePolicy3.setHeightForWidth(self.label_multiple_start.sizePolicy().hasHeightForWidth())
+        self.label_multiple_start.setSizePolicy(sizePolicy3)
 
-        self.output_multiple_layout.addWidget(self.output_multiple_button)
+        self.verticalLayout_multiple_dates.addWidget(self.label_multiple_start)
 
-        self.output_header_multiple_label = QLabel(self.multiple_tab)
-        self.output_header_multiple_label.setObjectName("output_header_multiple_label")
-        sizePolicy1.setHeightForWidth(self.output_header_multiple_label.sizePolicy().hasHeightForWidth())
-        self.output_header_multiple_label.setSizePolicy(sizePolicy1)
+        self.dateEdit_multiple_start = QDateEdit(self.tab_multiple)
+        self.dateEdit_multiple_start.setObjectName(u"dateEdit_multiple_start")
+        sizePolicy1.setHeightForWidth(self.dateEdit_multiple_start.sizePolicy().hasHeightForWidth())
+        self.dateEdit_multiple_start.setSizePolicy(sizePolicy1)
+        self.dateEdit_multiple_start.setProperty("showGroupSeparator", False)
+        self.dateEdit_multiple_start.setMaximumDate(QDate(2030, 12, 31))
+        self.dateEdit_multiple_start.setMinimumDate(QDate(2023, 1, 1))
+        self.dateEdit_multiple_start.setCalendarPopup(True)
 
-        self.output_multiple_layout.addWidget(self.output_header_multiple_label)
+        self.verticalLayout_multiple_dates.addWidget(self.dateEdit_multiple_start)
 
-        self.output_multiple_label = QLabel(self.multiple_tab)
-        self.output_multiple_label.setObjectName("output_multiple_label")
-        sizePolicy2.setHeightForWidth(self.output_multiple_label.sizePolicy().hasHeightForWidth())
-        self.output_multiple_label.setSizePolicy(sizePolicy2)
-        self.output_multiple_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_multiple_end = QLabel(self.tab_multiple)
+        self.label_multiple_end.setObjectName(u"label_multiple_end")
+        sizePolicy3.setHeightForWidth(self.label_multiple_end.sizePolicy().hasHeightForWidth())
+        self.label_multiple_end.setSizePolicy(sizePolicy3)
 
-        self.output_multiple_layout.addWidget(self.output_multiple_label)
+        self.verticalLayout_multiple_dates.addWidget(self.label_multiple_end)
+
+        self.dateEdit_multiple_end = QDateEdit(self.tab_multiple)
+        self.dateEdit_multiple_end.setObjectName(u"dateEdit_multiple_end")
+        self.dateEdit_multiple_end.setMaximumDate(QDate(2030, 12, 31))
+        self.dateEdit_multiple_end.setMinimumDate(QDate(2023, 1, 1))
+        self.dateEdit_multiple_end.setCalendarPopup(True)
+
+        self.verticalLayout_multiple_dates.addWidget(self.dateEdit_multiple_end)
 
 
-        self.gridLayout_3.addLayout(self.output_multiple_layout, 1, 0, 1, 1)
+        self.gridLayout.addLayout(self.verticalLayout_multiple_dates, 0, 1, 1, 1)
 
-        self.line = QFrame(self.multiple_tab)
-        self.line.setObjectName("line")
+        self.line_multiple_progress = QFrame(self.tab_multiple)
+        self.line_multiple_progress.setObjectName(u"line_multiple_progress")
+        self.line_multiple_progress.setFrameShadow(QFrame.Sunken)
+        self.line_multiple_progress.setFrameShape(QFrame.HLine)
+
+        self.gridLayout.addWidget(self.line_multiple_progress, 1, 0, 1, 2)
+
+        self.tabWidget.addTab(self.tab_multiple, "")
+        self.tab_singular = QWidget()
+        self.tab_singular.setObjectName(u"tab_singular")
+        self.gridLayout_2 = QGridLayout(self.tab_singular)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.formLayout_singular_write = QFormLayout()
+        self.formLayout_singular_write.setObjectName(u"formLayout_singular_write")
+        self.label_singular_name = QLabel(self.tab_singular)
+        self.label_singular_name.setObjectName(u"label_singular_name")
+        sizePolicy2.setHeightForWidth(self.label_singular_name.sizePolicy().hasHeightForWidth())
+        self.label_singular_name.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(0, QFormLayout.LabelRole, self.label_singular_name)
+
+        self.lineEdit_singular_name = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_name.setObjectName(u"lineEdit_singular_name")
+
+        self.formLayout_singular_write.setWidget(0, QFormLayout.FieldRole, self.lineEdit_singular_name)
+
+        self.label_singular_cpf = QLabel(self.tab_singular)
+        self.label_singular_cpf.setObjectName(u"label_singular_cpf")
+        sizePolicy2.setHeightForWidth(self.label_singular_cpf.sizePolicy().hasHeightForWidth())
+        self.label_singular_cpf.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(1, QFormLayout.LabelRole, self.label_singular_cpf)
+
+        self.label_singular_matricula = QLabel(self.tab_singular)
+        self.label_singular_matricula.setObjectName(u"label_singular_matricula")
+        sizePolicy2.setHeightForWidth(self.label_singular_matricula.sizePolicy().hasHeightForWidth())
+        self.label_singular_matricula.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(2, QFormLayout.LabelRole, self.label_singular_matricula)
+
+        self.label_singular_cnpj = QLabel(self.tab_singular)
+        self.label_singular_cnpj.setObjectName(u"label_singular_cnpj")
+        sizePolicy2.setHeightForWidth(self.label_singular_cnpj.sizePolicy().hasHeightForWidth())
+        self.label_singular_cnpj.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(4, QFormLayout.LabelRole, self.label_singular_cnpj)
+
+        self.lineEdit_singular_cpf = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_cpf.setObjectName(u"lineEdit_singular_cpf")
+
+        self.formLayout_singular_write.setWidget(1, QFormLayout.FieldRole, self.lineEdit_singular_cpf)
+
+        self.lineEdit_singular_matricula = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_matricula.setObjectName(u"lineEdit_singular_matricula")
+
+        self.formLayout_singular_write.setWidget(2, QFormLayout.FieldRole, self.lineEdit_singular_matricula)
+
+        self.lineEdit_singular_cnpj = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_cnpj.setObjectName(u"lineEdit_singular_cnpj")
+
+        self.formLayout_singular_write.setWidget(4, QFormLayout.FieldRole, self.lineEdit_singular_cnpj)
+
+        self.label_singular_apolice = QLabel(self.tab_singular)
+        self.label_singular_apolice.setObjectName(u"label_singular_apolice")
+        sizePolicy2.setHeightForWidth(self.label_singular_apolice.sizePolicy().hasHeightForWidth())
+        self.label_singular_apolice.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(5, QFormLayout.LabelRole, self.label_singular_apolice)
+
+        self.lineEdit_singular_apolice = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_apolice.setObjectName(u"lineEdit_singular_apolice")
+
+        self.formLayout_singular_write.setWidget(5, QFormLayout.FieldRole, self.lineEdit_singular_apolice)
+
+        self.label_singular_client = QLabel(self.tab_singular)
+        self.label_singular_client.setObjectName(u"label_singular_client")
+        sizePolicy2.setHeightForWidth(self.label_singular_client.sizePolicy().hasHeightForWidth())
+        self.label_singular_client.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(3, QFormLayout.LabelRole, self.label_singular_client)
+
+        self.lineEdit_singular_client = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_client.setObjectName(u"lineEdit_singular_client")
+
+        self.formLayout_singular_write.setWidget(3, QFormLayout.FieldRole, self.lineEdit_singular_client)
+
+        self.label_singular_startdate = QLabel(self.tab_singular)
+        self.label_singular_startdate.setObjectName(u"label_singular_startdate")
+        sizePolicy2.setHeightForWidth(self.label_singular_startdate.sizePolicy().hasHeightForWidth())
+        self.label_singular_startdate.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(6, QFormLayout.LabelRole, self.label_singular_startdate)
+
+        self.label_singular_enddate = QLabel(self.tab_singular)
+        self.label_singular_enddate.setObjectName(u"label_singular_enddate")
+        sizePolicy2.setHeightForWidth(self.label_singular_enddate.sizePolicy().hasHeightForWidth())
+        self.label_singular_enddate.setSizePolicy(sizePolicy2)
+
+        self.formLayout_singular_write.setWidget(7, QFormLayout.LabelRole, self.label_singular_enddate)
+
+        self.dateEdit_singular_start = QDateEdit(self.tab_singular)
+        self.dateEdit_singular_start.setObjectName(u"dateEdit_singular_start")
+        self.dateEdit_singular_start.setCalendarPopup(True)
+
+        self.formLayout_singular_write.setWidget(6, QFormLayout.FieldRole, self.dateEdit_singular_start)
+
+        self.dateEdit_singular_end = QDateEdit(self.tab_singular)
+        self.dateEdit_singular_end.setObjectName(u"dateEdit_singular_end")
+        self.dateEdit_singular_end.setCalendarPopup(True)
+
+        self.formLayout_singular_write.setWidget(7, QFormLayout.FieldRole, self.dateEdit_singular_end)
+
+        self.gridLayout_2.addLayout(self.formLayout_singular_write, 1, 1, 1, 1)
+
+        self.horizontalLayout_singular_select_output = QHBoxLayout()
+        self.horizontalLayout_singular_select_output.setObjectName(u"horizontalLayout_singular_select_output")
+        self.pushButton_singular_select_output = QPushButton(self.tab_singular)
+        self.pushButton_singular_select_output.setObjectName(u"pushButton_singular_select_output")
+
+        self.horizontalLayout_singular_select_output.addWidget(self.pushButton_singular_select_output)
+
+        self.label_singular_output_header = QLabel(self.tab_singular)
+        self.label_singular_output_header.setObjectName(u"label_singular_output_header")
+        sizePolicy2.setHeightForWidth(self.label_singular_output_header.sizePolicy().hasHeightForWidth())
+        self.label_singular_output_header.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_singular_select_output.addWidget(self.label_singular_output_header)
+
+        self.label_singular_output_text = QLabel(self.tab_singular)
+        self.label_singular_output_text.setObjectName(u"label_singular_output_text")
+        sizePolicy4.setHeightForWidth(self.label_singular_output_text.sizePolicy().hasHeightForWidth())
+        self.label_singular_output_text.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_singular_select_output.addWidget(self.label_singular_output_text)
+
+
+        self.gridLayout_2.addLayout(self.horizontalLayout_singular_select_output, 0, 0, 1, 2)
+
+        self.listWidget_singular_cobertura = QListWidget(self.tab_singular)
+        self.listWidget_singular_cobertura.setObjectName(u"listWidget_singular_cobertura")
+
+        self.gridLayout_2.addWidget(self.listWidget_singular_cobertura, 1, 0, 2, 1)
+
+        self.pushButton_singular_emit = QPushButton(self.tab_singular)
+        self.pushButton_singular_emit.setObjectName(u"pushButton_singular_emit")
+        self.pushButton_singular_emit.setMinimumSize(QSize(0, 40))
+        self.pushButton_singular_emit.setMaximumSize(QSize(200, 16777215))
+        self.pushButton_singular_emit.setAutoRepeat(False)
+
+        self.gridLayout_2.addWidget(self.pushButton_singular_emit, 2, 1, 1, 1)
+
+        self.tabWidget.addTab(self.tab_singular, "")
+        self.tab_config = QWidget()
+        self.tab_config.setObjectName(u"tab_config")
+        self.verticalLayout_2 = QVBoxLayout(self.tab_config)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.formLayout_config_all = QFormLayout()
+        self.formLayout_config_all.setObjectName(u"formLayout_config_all")
+        self.label_config_max_threads = QLabel(self.tab_config)
+        self.label_config_max_threads.setObjectName(u"label_config_max_threads")
+        sizePolicy2.setHeightForWidth(self.label_config_max_threads.sizePolicy().hasHeightForWidth())
+        self.label_config_max_threads.setSizePolicy(sizePolicy2)
+
+        self.formLayout_config_all.setWidget(0, QFormLayout.LabelRole, self.label_config_max_threads)
+
+        self.horizontalLayout_config_max_threads = QHBoxLayout()
+        self.horizontalLayout_config_max_threads.setObjectName(u"horizontalLayout_config_max_threads")
+        self.horizontalSlider_config_max_threads = QSlider(self.tab_config)
+        self.horizontalSlider_config_max_threads.setObjectName(u"horizontalSlider_config_max_threads")
+        self.horizontalSlider_config_max_threads.setMinimum(4)
+        self.horizontalSlider_config_max_threads.setMaximum(150)
+        self.horizontalSlider_config_max_threads.setSingleStep(1)
+        self.horizontalSlider_config_max_threads.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_config_max_threads.addWidget(self.horizontalSlider_config_max_threads)
+
+        self.label_config_max_thread_number = QLabel(self.tab_config)
+        self.label_config_max_thread_number.setObjectName(u"label_config_max_thread_number")
+        sizePolicy2.setHeightForWidth(self.label_config_max_thread_number.sizePolicy().hasHeightForWidth())
+        self.label_config_max_thread_number.setSizePolicy(sizePolicy2)
+        self.label_config_max_thread_number.setMinimumSize(QSize(20, 0))
+        self.label_config_max_thread_number.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.horizontalLayout_config_max_threads.addWidget(self.label_config_max_thread_number)
+
+
+        self.formLayout_config_all.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_config_max_threads)
+
+        self.label_config_target_threads = QLabel(self.tab_config)
+        self.label_config_target_threads.setObjectName(u"label_config_target_threads")
+        sizePolicy2.setHeightForWidth(self.label_config_target_threads.sizePolicy().hasHeightForWidth())
+        self.label_config_target_threads.setSizePolicy(sizePolicy2)
+
+        self.formLayout_config_all.setWidget(1, QFormLayout.LabelRole, self.label_config_target_threads)
+
+        self.horizontalLayout_config_target_threads = QHBoxLayout()
+        self.horizontalLayout_config_target_threads.setObjectName(u"horizontalLayout_config_target_threads")
+        self.horizontalSlider_config_target_threads = QSlider(self.tab_config)
+        self.horizontalSlider_config_target_threads.setObjectName(u"horizontalSlider_config_target_threads")
+        self.horizontalSlider_config_target_threads.setMinimum(4)
+        self.horizontalSlider_config_target_threads.setMaximum(150)
+        self.horizontalSlider_config_target_threads.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_config_target_threads.addWidget(self.horizontalSlider_config_target_threads)
+
+        self.label_config_target_thread_number = QLabel(self.tab_config)
+        self.label_config_target_thread_number.setObjectName(u"label_config_target_thread_number")
+        sizePolicy2.setHeightForWidth(self.label_config_target_thread_number.sizePolicy().hasHeightForWidth())
+        self.label_config_target_thread_number.setSizePolicy(sizePolicy2)
+        self.label_config_target_thread_number.setMinimumSize(QSize(20, 0))
+        self.label_config_target_thread_number.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.horizontalLayout_config_target_threads.addWidget(self.label_config_target_thread_number)
+
+
+        self.formLayout_config_all.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_config_target_threads)
+
+        self.label_config_max_processes = QLabel(self.tab_config)
+        self.label_config_max_processes.setObjectName(u"label_config_max_processes")
+        sizePolicy2.setHeightForWidth(self.label_config_max_processes.sizePolicy().hasHeightForWidth())
+        self.label_config_max_processes.setSizePolicy(sizePolicy2)
+
+        self.formLayout_config_all.setWidget(2, QFormLayout.LabelRole, self.label_config_max_processes)
+
+        self.horizontalLayout_config_max_processes = QHBoxLayout()
+        self.horizontalLayout_config_max_processes.setObjectName(u"horizontalLayout_config_max_processes")
+        self.horizontalSlider_config_max_processes = QSlider(self.tab_config)
+        self.horizontalSlider_config_max_processes.setObjectName(u"horizontalSlider_config_max_processes")
+        self.horizontalSlider_config_max_processes.setMinimum(1)
+        self.horizontalSlider_config_max_processes.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_config_max_processes.addWidget(self.horizontalSlider_config_max_processes)
+
+        self.label_config_max_processes_number = QLabel(self.tab_config)
+        self.label_config_max_processes_number.setObjectName(u"label_config_max_processes_number")
+        sizePolicy2.setHeightForWidth(self.label_config_max_processes_number.sizePolicy().hasHeightForWidth())
+        self.label_config_max_processes_number.setSizePolicy(sizePolicy2)
+        self.label_config_max_processes_number.setMinimumSize(QSize(20, 0))
+        self.label_config_max_processes_number.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.horizontalLayout_config_max_processes.addWidget(self.label_config_max_processes_number)
+
+
+        self.formLayout_config_all.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout_config_max_processes)
+
+        self.line = QFrame(self.tab_config)
+        self.line.setObjectName(u"line")
         self.line.setFrameShape(QFrame.HLine)
         self.line.setFrameShadow(QFrame.Sunken)
 
-        self.gridLayout_3.addWidget(self.line, 3, 0, 1, 1)
+        self.formLayout_config_all.setWidget(3, QFormLayout.SpanningRole, self.line)
 
-        self.emission_layout = QHBoxLayout()
-        self.emission_layout.setObjectName("emission_layout")
-        self.labels_grid_layout = QGridLayout()
-        self.labels_grid_layout.setObjectName("labels_grid_layout")
-        self.speed_label = QLabel(self.multiple_tab)
-        self.speed_label.setObjectName("speed_label")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.speed_label.sizePolicy().hasHeightForWidth())
-        self.speed_label.setSizePolicy(sizePolicy3)
+        self.pushButton_config_cobertura_source = QPushButton(self.tab_config)
+        self.pushButton_config_cobertura_source.setObjectName(u"pushButton_config_cobertura_source")
+        self.pushButton_config_cobertura_source.setMinimumSize(QSize(0, 30))
 
-        self.labels_grid_layout.addWidget(self.speed_label, 0, 1, 1, 1)
+        self.formLayout_config_all.setWidget(4, QFormLayout.LabelRole, self.pushButton_config_cobertura_source)
 
-        self.speed_header_label = QLabel(self.multiple_tab)
-        self.speed_header_label.setObjectName("speed_header_label")
-        sizePolicy1.setHeightForWidth(self.speed_header_label.sizePolicy().hasHeightForWidth())
-        self.speed_header_label.setSizePolicy(sizePolicy1)
+        self.horizontalLayout_config_cobertura_source = QHBoxLayout()
+        self.horizontalLayout_config_cobertura_source.setObjectName(u"horizontalLayout_config_cobertura_source")
+        self.label_config_selection_cobertura = QLabel(self.tab_config)
+        self.label_config_selection_cobertura.setObjectName(u"label_config_selection_cobertura")
+        sizePolicy2.setHeightForWidth(self.label_config_selection_cobertura.sizePolicy().hasHeightForWidth())
+        self.label_config_selection_cobertura.setSizePolicy(sizePolicy2)
 
-        self.labels_grid_layout.addWidget(self.speed_header_label, 0, 0, 1, 1)
+        self.horizontalLayout_config_cobertura_source.addWidget(self.label_config_selection_cobertura)
 
-        self.time_header_label = QLabel(self.multiple_tab)
-        self.time_header_label.setObjectName("time_header_label")
-        sizePolicy1.setHeightForWidth(self.time_header_label.sizePolicy().hasHeightForWidth())
-        self.time_header_label.setSizePolicy(sizePolicy1)
+        self.label_config_cobertura_text = QLabel(self.tab_config)
+        self.label_config_cobertura_text.setObjectName(u"label_config_cobertura_text")
+        sizePolicy4.setHeightForWidth(self.label_config_cobertura_text.sizePolicy().hasHeightForWidth())
+        self.label_config_cobertura_text.setSizePolicy(sizePolicy4)
 
-        self.labels_grid_layout.addWidget(self.time_header_label, 1, 0, 1, 1)
-
-        self.time_label = QLabel(self.multiple_tab)
-        self.time_label.setObjectName("time_label")
-        sizePolicy3.setHeightForWidth(self.time_label.sizePolicy().hasHeightForWidth())
-        self.time_label.setSizePolicy(sizePolicy3)
-
-        self.labels_grid_layout.addWidget(self.time_label, 1, 1, 1, 1)
+        self.horizontalLayout_config_cobertura_source.addWidget(self.label_config_cobertura_text)
 
 
-        self.emission_layout.addLayout(self.labels_grid_layout)
+        self.formLayout_config_all.setLayout(4, QFormLayout.FieldRole, self.horizontalLayout_config_cobertura_source)
 
-        self.emission_button = QPushButton(self.multiple_tab)
-        self.emission_button.setObjectName("emission_button")
-        self.emission_button.setMinimumSize(QSize(0, 30))
+        self.pushButton_config_cnv_source = QPushButton(self.tab_config)
+        self.pushButton_config_cnv_source.setObjectName(u"pushButton_config_cnv_source")
+        self.pushButton_config_cnv_source.setMinimumSize(QSize(0, 30))
 
-        self.emission_layout.addWidget(self.emission_button)
+        self.formLayout_config_all.setWidget(5, QFormLayout.LabelRole, self.pushButton_config_cnv_source)
+
+        self.horizontalLayout_config_cnv_source = QHBoxLayout()
+        self.horizontalLayout_config_cnv_source.setObjectName(u"horizontalLayout_config_cnv_source")
+        self.label_config_selection_cnv = QLabel(self.tab_config)
+        self.label_config_selection_cnv.setObjectName(u"label_config_selection_cnv")
+        sizePolicy2.setHeightForWidth(self.label_config_selection_cnv.sizePolicy().hasHeightForWidth())
+        self.label_config_selection_cnv.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_config_cnv_source.addWidget(self.label_config_selection_cnv)
+
+        self.label_config_cnv_text = QLabel(self.tab_config)
+        self.label_config_cnv_text.setObjectName(u"label_config_cnv_text")
+        sizePolicy4.setHeightForWidth(self.label_config_cnv_text.sizePolicy().hasHeightForWidth())
+        self.label_config_cnv_text.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_config_cnv_source.addWidget(self.label_config_cnv_text)
 
 
-        self.gridLayout_3.addLayout(self.emission_layout, 5, 0, 1, 1)
+        self.formLayout_config_all.setLayout(5, QFormLayout.FieldRole, self.horizontalLayout_config_cnv_source)
 
-        self.tabs.addTab(self.multiple_tab, "")
-        self.singular_tab = QWidget()
-        self.singular_tab.setObjectName("singular_tab")
-        self.gridLayout_2 = QGridLayout(self.singular_tab)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.success_label = QLabel(self.singular_tab)
-        self.success_label.setObjectName("success_label")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.success_label.sizePolicy().hasHeightForWidth())
-        self.success_label.setSizePolicy(sizePolicy4)
-        self.success_label.setAlignment(Qt.AlignCenter)
+        self.pushButton_config_change_pdf_template = QPushButton(self.tab_config)
+        self.pushButton_config_change_pdf_template.setObjectName(u"pushButton_config_change_pdf_template")
+        self.pushButton_config_change_pdf_template.setMinimumSize(QSize(0, 30))
 
-        self.gridLayout_2.addWidget(self.success_label, 18, 0, 1, 6)
+        self.formLayout_config_all.setWidget(6, QFormLayout.LabelRole, self.pushButton_config_change_pdf_template)
 
-        self.emit_button = QPushButton(self.singular_tab)
-        self.emit_button.setObjectName("emit_button")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.horizontalLayout_config_pdf_template = QHBoxLayout()
+        self.horizontalLayout_config_pdf_template.setObjectName(u"horizontalLayout_config_pdf_template")
+        self.label_config_selection_pdf = QLabel(self.tab_config)
+        self.label_config_selection_pdf.setObjectName(u"label_config_selection_pdf")
+        sizePolicy2.setHeightForWidth(self.label_config_selection_pdf.sizePolicy().hasHeightForWidth())
+        self.label_config_selection_pdf.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_config_pdf_template.addWidget(self.label_config_selection_pdf)
+
+        self.label_config_pdf_text = QLabel(self.tab_config)
+        self.label_config_pdf_text.setObjectName(u"label_config_pdf_text")
+        sizePolicy4.setHeightForWidth(self.label_config_pdf_text.sizePolicy().hasHeightForWidth())
+        self.label_config_pdf_text.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_config_pdf_template.addWidget(self.label_config_pdf_text)
+
+
+        self.formLayout_config_all.setLayout(6, QFormLayout.FieldRole, self.horizontalLayout_config_pdf_template)
+
+        self.label_config_start_date = QLabel(self.tab_config)
+        self.label_config_start_date.setObjectName(u"label_config_start_date")
+        sizePolicy2.setHeightForWidth(self.label_config_start_date.sizePolicy().hasHeightForWidth())
+        self.label_config_start_date.setSizePolicy(sizePolicy2)
+
+        self.formLayout_config_all.setWidget(8, QFormLayout.LabelRole, self.label_config_start_date)
+
+        self.dateEdit_config_start = QDateEdit(self.tab_config)
+        self.dateEdit_config_start.setObjectName(u"dateEdit_config_start")
+        self.dateEdit_config_start.setMaximumDate(QDate(2030, 12, 31))
+        self.dateEdit_config_start.setMinimumDate(QDate(2023, 1, 1))
+        self.dateEdit_config_start.setCalendarPopup(True)
+
+        self.formLayout_config_all.setWidget(8, QFormLayout.FieldRole, self.dateEdit_config_start)
+
+        self.line_2 = QFrame(self.tab_config)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setFrameShape(QFrame.HLine)
+        self.line_2.setFrameShadow(QFrame.Sunken)
+
+        self.formLayout_config_all.setWidget(7, QFormLayout.SpanningRole, self.line_2)
+
+        self.label_config_end_date = QLabel(self.tab_config)
+        self.label_config_end_date.setObjectName(u"label_config_end_date")
+        sizePolicy2.setHeightForWidth(self.label_config_end_date.sizePolicy().hasHeightForWidth())
+        self.label_config_end_date.setSizePolicy(sizePolicy2)
+
+        self.formLayout_config_all.setWidget(9, QFormLayout.LabelRole, self.label_config_end_date)
+
+        self.dateEdit_config_end = QDateEdit(self.tab_config)
+        self.dateEdit_config_end.setObjectName(u"dateEdit_config_end")
+        self.dateEdit_config_end.setMaximumDate(QDate(2030, 12, 31))
+        self.dateEdit_config_end.setMinimumDate(QDate(2023, 1, 1))
+        self.dateEdit_config_end.setCalendarPopup(True)
+
+        self.formLayout_config_all.setWidget(9, QFormLayout.FieldRole, self.dateEdit_config_end)
+
+        self.pushButton_config_source = QPushButton(self.tab_config)
+        self.pushButton_config_source.setObjectName(u"pushButton_config_source")
+        self.pushButton_config_source.setMinimumSize(QSize(0, 30))
+
+        self.formLayout_config_all.setWidget(11, QFormLayout.LabelRole, self.pushButton_config_source)
+
+        self.horizontalLayout_config_data_source = QHBoxLayout()
+        self.horizontalLayout_config_data_source.setObjectName(u"horizontalLayout_config_data_source")
+        self.label_config_selection_data_source = QLabel(self.tab_config)
+        self.label_config_selection_data_source.setObjectName(u"label_config_selection_data_source")
+        sizePolicy2.setHeightForWidth(self.label_config_selection_data_source.sizePolicy().hasHeightForWidth())
+        self.label_config_selection_data_source.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_config_data_source.addWidget(self.label_config_selection_data_source)
+
+        self.label_config_source_text = QLabel(self.tab_config)
+        self.label_config_source_text.setObjectName(u"label_config_source_text")
+        sizePolicy4.setHeightForWidth(self.label_config_source_text.sizePolicy().hasHeightForWidth())
+        self.label_config_source_text.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_config_data_source.addWidget(self.label_config_source_text)
+
+
+        self.formLayout_config_all.setLayout(11, QFormLayout.FieldRole, self.horizontalLayout_config_data_source)
+
+        self.line_3 = QFrame(self.tab_config)
+        self.line_3.setObjectName(u"line_3")
+        self.line_3.setFrameShape(QFrame.HLine)
+        self.line_3.setFrameShadow(QFrame.Sunken)
+
+        self.formLayout_config_all.setWidget(10, QFormLayout.SpanningRole, self.line_3)
+
+        self.pushButton_config_output_dir = QPushButton(self.tab_config)
+        self.pushButton_config_output_dir.setObjectName(u"pushButton_config_output_dir")
+        self.pushButton_config_output_dir.setMinimumSize(QSize(0, 30))
+
+        self.formLayout_config_all.setWidget(12, QFormLayout.LabelRole, self.pushButton_config_output_dir)
+
+        self.horizontalLayout_config_default_output_dir = QHBoxLayout()
+        self.horizontalLayout_config_default_output_dir.setObjectName(u"horizontalLayout_config_default_output_dir")
+        self.label_config_selection_output_dir = QLabel(self.tab_config)
+        self.label_config_selection_output_dir.setObjectName(u"label_config_selection_output_dir")
+        sizePolicy2.setHeightForWidth(self.label_config_selection_output_dir.sizePolicy().hasHeightForWidth())
+        self.label_config_selection_output_dir.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_config_default_output_dir.addWidget(self.label_config_selection_output_dir)
+
+        self.label_config_output_dir_text = QLabel(self.tab_config)
+        self.label_config_output_dir_text.setObjectName(u"label_config_output_dir_text")
+        sizePolicy4.setHeightForWidth(self.label_config_output_dir_text.sizePolicy().hasHeightForWidth())
+        self.label_config_output_dir_text.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_config_default_output_dir.addWidget(self.label_config_output_dir_text)
+
+
+        self.formLayout_config_all.setLayout(12, QFormLayout.FieldRole, self.horizontalLayout_config_default_output_dir)
+
+
+        self.verticalLayout_2.addLayout(self.formLayout_config_all)
+
+        self.pushButton_config_confirm = QPushButton(self.tab_config)
+        self.pushButton_config_confirm.setObjectName(u"pushButton_config_confirm")
+        self.pushButton_config_confirm.setMinimumSize(QSize(0, 40))
+        self.pushButton_config_confirm.setMaximumSize(QSize(150, 16777215))
+        self.pushButton_config_confirm.setToolTipDuration(0)
+        self.pushButton_config_confirm.setLayoutDirection(Qt.LeftToRight)
+
+        self.verticalLayout_2.addWidget(self.pushButton_config_confirm)
+
+        self.tabWidget.addTab(self.tab_config, "")
+
+        self.verticalLayout.addWidget(self.tabWidget)
+
+        self.label_console = QLabel(self.centralwidget)
+        self.label_console.setObjectName(u"label_console")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.emit_button.sizePolicy().hasHeightForWidth())
-        self.emit_button.setSizePolicy(sizePolicy5)
-        self.emit_button.setMinimumSize(QSize(0, 30))
-
-        self.gridLayout_2.addWidget(self.emit_button, 17, 0, 1, 6)
-
-        self.output_button = QPushButton(self.singular_tab)
-        self.output_button.setObjectName("output_button")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
-        sizePolicy6.setHorizontalStretch(0)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.output_button.sizePolicy().hasHeightForWidth())
-        self.output_button.setSizePolicy(sizePolicy6)
-        self.output_button.setMinimumSize(QSize(0, 30))
-
-        self.gridLayout_2.addWidget(self.output_button, 0, 0, 1, 1)
-
-        self.output_label = QLabel(self.singular_tab)
-        self.output_label.setObjectName("output_label")
-        sizePolicy3.setHeightForWidth(self.output_label.sizePolicy().hasHeightForWidth())
-        self.output_label.setSizePolicy(sizePolicy3)
-
-        self.gridLayout_2.addWidget(self.output_label, 0, 2, 1, 4)
-
-        self.output_header_label = QLabel(self.singular_tab)
-        self.output_header_label.setObjectName("output_header_label")
-        sizePolicy6.setHeightForWidth(self.output_header_label.sizePolicy().hasHeightForWidth())
-        self.output_header_label.setSizePolicy(sizePolicy6)
-
-        self.gridLayout_2.addWidget(self.output_header_label, 0, 1, 1, 1)
-
-        self.cobertura_header_label = QLabel(self.singular_tab)
-        self.cobertura_header_label.setObjectName("cobertura_header_label")
-        sizePolicy1.setHeightForWidth(self.cobertura_header_label.sizePolicy().hasHeightForWidth())
-        self.cobertura_header_label.setSizePolicy(sizePolicy1)
-
-        self.gridLayout_2.addWidget(self.cobertura_header_label, 16, 0, 1, 1)
-
-        self.cobertura_label = QLabel(self.singular_tab)
-        self.cobertura_label.setObjectName("cobertura_label")
-        sizePolicy4.setHeightForWidth(self.cobertura_label.sizePolicy().hasHeightForWidth())
-        self.cobertura_label.setSizePolicy(sizePolicy4)
-
-        self.gridLayout_2.addWidget(self.cobertura_label, 16, 1, 1, 5)
-
-        self.main_layout = QHBoxLayout()
-        self.main_layout.setObjectName("main_layout")
-        self.coberturas_list = QListWidget(self.singular_tab)
-        self.coberturas_list.setObjectName("coberturas_list")
-        self.coberturas_list.addItems(get_coberturas(var.coberturas_path))
-
-        self.main_layout.addWidget(self.coberturas_list)
-
-        self.input_layout_singular = QVBoxLayout()
-        self.input_layout_singular.setObjectName("input_layout_singular")
-        self.name_layout = QHBoxLayout()
-        self.name_layout.setObjectName("name_layout")
-        self.name_label = QLabel(self.singular_tab)
-        self.name_label.setObjectName("name_label")
-        sizePolicy6.setHeightForWidth(self.name_label.sizePolicy().hasHeightForWidth())
-        self.name_label.setSizePolicy(sizePolicy6)
-        self.name_label.setMinimumSize(QSize(60, 0))
-
-        self.name_layout.addWidget(self.name_label)
-
-        self.name_lineedit = QLineEdit(self.singular_tab)
-        self.name_lineedit.setObjectName("name_lineedit")
-        self.name_lineedit.setMaximumSize(QSize(16777215, 16777215))
-        self.name_lineedit.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
-
-        self.name_layout.addWidget(self.name_lineedit)
-
-
-        self.input_layout_singular.addLayout(self.name_layout)
-
-        self.cpf_layout = QHBoxLayout()
-        self.cpf_layout.setObjectName("cpf_layout")
-        self.cpf_label = QLabel(self.singular_tab)
-        self.cpf_label.setObjectName("cpf_label")
-        sizePolicy6.setHeightForWidth(self.cpf_label.sizePolicy().hasHeightForWidth())
-        self.cpf_label.setSizePolicy(sizePolicy6)
-        self.cpf_label.setMinimumSize(QSize(60, 0))
-
-        self.cpf_layout.addWidget(self.cpf_label)
-
-        self.cpf_lineedit = QLineEdit(self.singular_tab)
-        self.cpf_lineedit.setObjectName("cpf_lineedit")
-        self.cpf_lineedit.setMaximumSize(QSize(16777215, 16777215))
-        self.cpf_lineedit.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
-
-        self.cpf_layout.addWidget(self.cpf_lineedit)
-
-
-        self.input_layout_singular.addLayout(self.cpf_layout)
-
-        self.cnpj_layout = QHBoxLayout()
-        self.cnpj_layout.setObjectName("cnpj_layout")
-        self.cnpj_label = QLabel(self.singular_tab)
-        self.cnpj_label.setObjectName("cnpj_label")
-        sizePolicy6.setHeightForWidth(self.cnpj_label.sizePolicy().hasHeightForWidth())
-        self.cnpj_label.setSizePolicy(sizePolicy6)
-        self.cnpj_label.setMinimumSize(QSize(60, 0))
-
-        self.cnpj_layout.addWidget(self.cnpj_label)
-
-        self.cnpj_lineedit = QLineEdit(self.singular_tab)
-        self.cnpj_lineedit.setObjectName("cnpj_lineedit")
-        sizePolicy5.setHeightForWidth(self.cnpj_lineedit.sizePolicy().hasHeightForWidth())
-        self.cnpj_lineedit.setSizePolicy(sizePolicy5)
-        self.cnpj_lineedit.setMaximumSize(QSize(16777215, 16777215))
-        self.cnpj_lineedit.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
-
-        self.cnpj_layout.addWidget(self.cnpj_lineedit)
-
-
-        self.input_layout_singular.addLayout(self.cnpj_layout)
-
-        self.client_layout = QHBoxLayout()
-        self.client_layout.setObjectName("client_layout")
-        self.client_label = QLabel(self.singular_tab)
-        self.client_label.setObjectName("client_label")
-        sizePolicy6.setHeightForWidth(self.client_label.sizePolicy().hasHeightForWidth())
-        self.client_label.setSizePolicy(sizePolicy6)
-        self.client_label.setMinimumSize(QSize(60, 0))
-
-        self.client_layout.addWidget(self.client_label)
-
-        self.client_lineedit = QLineEdit(self.singular_tab)
-        self.client_lineedit.setObjectName("client_lineedit")
-
-        self.client_layout.addWidget(self.client_lineedit)
-
-
-        self.input_layout_singular.addLayout(self.client_layout)
-
-        self.apolice_layout = QHBoxLayout()
-        self.apolice_layout.setObjectName("apolice_layout")
-        self.apolice_label = QLabel(self.singular_tab)
-        self.apolice_label.setObjectName("apolice_label")
-        sizePolicy6.setHeightForWidth(self.apolice_label.sizePolicy().hasHeightForWidth())
-        self.apolice_label.setSizePolicy(sizePolicy6)
-        self.apolice_label.setMinimumSize(QSize(60, 0))
-
-        self.apolice_layout.addWidget(self.apolice_label)
-
-        self.apolice_lineedit = QLineEdit(self.singular_tab)
-        self.apolice_lineedit.setObjectName("apolice_lineedit")
-
-        self.apolice_layout.addWidget(self.apolice_lineedit)
-
-
-        self.input_layout_singular.addLayout(self.apolice_layout)
-
-        self.matricula_layout = QHBoxLayout()
-        self.matricula_layout.setObjectName("matricula_layout")
-        self.matricula_label = QLabel(self.singular_tab)
-        self.matricula_label.setObjectName("matricula_label")
-        sizePolicy6.setHeightForWidth(self.matricula_label.sizePolicy().hasHeightForWidth())
-        self.matricula_label.setSizePolicy(sizePolicy6)
-        self.matricula_label.setMinimumSize(QSize(60, 0))
-
-        self.matricula_layout.addWidget(self.matricula_label)
-
-        self.matricula_lineedit = QLineEdit(self.singular_tab)
-        self.matricula_lineedit.setObjectName("matricula_lineedit")
-        self.matricula_lineedit.setMaximumSize(QSize(16777215, 16777215))
-        self.matricula_lineedit.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
-
-        self.matricula_layout.addWidget(self.matricula_lineedit)
-
-
-        self.input_layout_singular.addLayout(self.matricula_layout)
-
-        self.start_date_layout_multiple = QHBoxLayout()
-        self.start_date_layout_multiple.setObjectName("start_date_layout_multiple")
-        self.start_date_singular_label = QLabel(self.singular_tab)
-        self.start_date_singular_label.setObjectName("start_date_singular_label")
-        sizePolicy6.setHeightForWidth(self.start_date_singular_label.sizePolicy().hasHeightForWidth())
-        self.start_date_singular_label.setSizePolicy(sizePolicy6)
-        self.start_date_singular_label.setMinimumSize(QSize(90, 0))
-
-        self.start_date_layout_multiple.addWidget(self.start_date_singular_label)
-
-        self.start_date_singular_dateedit = QDateEdit(self.singular_tab)
-        self.start_date_singular_dateedit.setObjectName("start_date_singular_dateedit")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        sizePolicy7.setHorizontalStretch(0)
-        sizePolicy7.setVerticalStretch(0)
-        sizePolicy7.setHeightForWidth(self.start_date_singular_dateedit.sizePolicy().hasHeightForWidth())
-        self.start_date_singular_dateedit.setSizePolicy(sizePolicy7)
-        self.start_date_singular_dateedit.setDateTime(QDateTime(QDate(2023, 1, 1), QTime(0, 0, 0)))
-        self.start_date_singular_dateedit.setTime(QTime(0, 0, 0))
-        self.start_date_singular_dateedit.setMaximumDate(QDate(2032, 12, 31))
-        self.start_date_singular_dateedit.setMinimumDate(QDate(2023, 1, 1))
-        self.start_date_singular_dateedit.setCalendarPopup(True)
-
-        self.start_date_layout_multiple.addWidget(self.start_date_singular_dateedit)
-
-
-        self.input_layout_singular.addLayout(self.start_date_layout_multiple)
-
-        self.end_date_layout_multiple = QHBoxLayout()
-        self.end_date_layout_multiple.setObjectName("end_date_layout_multiple")
-        self.end_date_singular_label = QLabel(self.singular_tab)
-        self.end_date_singular_label.setObjectName("end_date_singular_label")
-        sizePolicy6.setHeightForWidth(self.end_date_singular_label.sizePolicy().hasHeightForWidth())
-        self.end_date_singular_label.setSizePolicy(sizePolicy6)
-        self.end_date_singular_label.setMinimumSize(QSize(90, 0))
-
-        self.end_date_layout_multiple.addWidget(self.end_date_singular_label)
-
-        self.end_date_singular_dateedit = QDateEdit(self.singular_tab)
-        self.end_date_singular_dateedit.setObjectName("end_date_singular_dateedit")
-        sizePolicy7.setHeightForWidth(self.end_date_singular_dateedit.sizePolicy().hasHeightForWidth())
-        self.end_date_singular_dateedit.setSizePolicy(sizePolicy7)
-        self.end_date_singular_dateedit.setDateTime(QDateTime(QDate(2023, 1, 1), QTime(0, 0, 0)))
-        self.end_date_singular_dateedit.setTime(QTime(0, 0, 0))
-        self.end_date_singular_dateedit.setMaximumDate(QDate(2032, 12, 31))
-        self.end_date_singular_dateedit.setMinimumDate(QDate(2023, 1, 1))
-        self.end_date_singular_dateedit.setCalendarPopup(True)
-
-        self.end_date_layout_multiple.addWidget(self.end_date_singular_dateedit)
-
-
-        self.input_layout_singular.addLayout(self.end_date_layout_multiple)
-
-
-        self.main_layout.addLayout(self.input_layout_singular)
-
-
-        self.gridLayout_2.addLayout(self.main_layout, 1, 0, 2, 6)
-
-        self.tabs.addTab(self.singular_tab, "")
-
-        self.gridLayout.addWidget(self.tabs, 0, 0, 1, 1)
-
-
-        self.retranslateUi(Widget)
-        self.input_button.released.connect(self.select_input_directory)
-        self.output_multiple_button.released.connect(self.select_output_directory)
-        self.start_date_multiple_dateedit.dateChanged.connect(self.change_start_date_multiple)
-        self.end_date_multiple_dateedit.dateChanged.connect(self.change_end_date_multiple)
-        self.emission_button.released.connect(self.emit_multiple)
-        self.output_button.released.connect(self.select_output_directory)
-        self.emit_button.released.connect(self.emit_singular)
-        self.coberturas_list.itemSelectionChanged.connect(self.select_item)
-        self.start_date_singular_dateedit.dateChanged.connect(self.change_start_date_singular)
-        self.end_date_singular_dateedit.dateChanged.connect(self.change_end_date_singular)
-
-        QMetaObject.connectSlotsByName(Widget)
-    # setupUi
-
-    def retranslateUi(self, Widget):
-        Widget.setWindowTitle(QCoreApplication.translate("Widget", "Widget", None))
-        self.input_button.setText(QCoreApplication.translate("Widget", "Selecionar arquivo", None))
-        self.input_header_label.setText(QCoreApplication.translate("Widget", "Arquivo selecionado:", None))
-        self.input_label.setText("")
-        self.start_date_label.setText(QCoreApplication.translate("Widget", "Vigência inicial:", None))
-        self.end_date_label.setText(QCoreApplication.translate("Widget", "Vigência final:", None))
-        self.output_multiple_button.setText(QCoreApplication.translate("Widget", "Selecionar pasta de destino", None))
-        self.output_header_multiple_label.setText(QCoreApplication.translate("Widget", "Pasta de destino:", None))
-        self.output_multiple_label.setText("")
-        self.speed_label.setText("")
-        self.speed_header_label.setText(QCoreApplication.translate("Widget", "Velocidade de emissão:", None))
-        self.time_header_label.setText(QCoreApplication.translate("Widget", "Tempo de emissão:", None))
-        self.time_label.setText("")
-        self.emission_button.setText(QCoreApplication.translate("Widget", "Emitir certificados", None))
-        self.tabs.setTabText(self.tabs.indexOf(self.multiple_tab), QCoreApplication.translate("Widget", "Múltiplos", None))
-        self.success_label.setText("")
-        self.emit_button.setText(QCoreApplication.translate("Widget", "Emitir certificado", None))
-        self.output_button.setText(QCoreApplication.translate("Widget", "Escolher diretório de destino", None))
-        self.output_label.setText("")
-        self.output_header_label.setText(QCoreApplication.translate("Widget", "Pasta de destino:", None))
-        self.cobertura_header_label.setText(QCoreApplication.translate("Widget", "Cobertura selecionada:", None))
-        self.cobertura_label.setText("")
-        self.name_label.setText(QCoreApplication.translate("Widget", "Nome:", None))
-        self.cpf_label.setText(QCoreApplication.translate("Widget", "CPF: ", None))
-        self.cnpj_label.setText(QCoreApplication.translate("Widget", "CNPJ: ", None))
-        self.client_label.setText(QCoreApplication.translate("Widget", "Cliente:", None))
-        self.apolice_label.setText(QCoreApplication.translate("Widget", "Apólice:", None))
-        self.matricula_label.setText(QCoreApplication.translate("Widget", "Matrícula: ", None))
-        self.start_date_singular_label.setText(QCoreApplication.translate("Widget", "Vigência inicial:", None))
-        self.end_date_singular_label.setText(QCoreApplication.translate("Widget", "Vigência final:", None))
-        self.tabs.setTabText(self.tabs.indexOf(self.singular_tab), QCoreApplication.translate("Widget", "Individual", None))
-    # retranslateUi
-
-
+        sizePolicy5.setHeightForWidth(self.label_console.sizePolicy().hasHeightForWidth())
+        self.label_console.setSizePolicy(sizePolicy5)
+        self.label_console.setAlignment(Qt.AlignCenter)
+        self.label_console.setWordWrap(True)
+
+        self.verticalLayout.addWidget(self.label_console)
+
+        MainWindow.setCentralWidget(self.centralwidget)
+
+        # Coisas adicionadas manualmente, e não pelo PyCreator. --------------------------------------------------------
+        MainWindow.setWindowIcon(QIcon('dados/ícone.ico'))
+        self.listWidget_singular_cobertura.addItems(get_coberturas(var.coberturas_path))
+        self.horizontalSlider_config_max_threads.setValue(var.max_threads)
+        self.horizontalSlider_config_target_threads.setValue(var.target_threads)
+        self.horizontalSlider_config_max_processes.setMaximum(cpu_count())
+        self.horizontalSlider_config_max_processes.setValue(var.max_processes)
+        self.dateEdit_multiple_start.setDate(QDate(int(var.start_period[6:11]), int(var.start_period[3:5]), int(var.start_period[:2])))
+        self.dateEdit_multiple_end.setDate(QDate(int(var.end_period[6:11]), int(var.end_period[3:5]), int(var.end_period[:2])))
+        self.dateEdit_singular_start.setDate(QDate(int(var.start_period[6:11]), int(var.start_period[3:5]), int(var.start_period[:2])))
+        self.dateEdit_singular_end.setDate(QDate(int(var.end_period[6:11]), int(var.end_period[3:5]), int(var.end_period[:2])))
+        self.dateEdit_config_start.setDate(QDate(int(var.start_period[6:11]), int(var.start_period[3:5]), int(var.start_period[:2])))
+        self.dateEdit_config_end.setDate(QDate(int(var.end_period[6:11]), int(var.end_period[3:5]), int(var.end_period[:2])))
+        # Fim das coisas adicionadas manualmente. Essas linhas devem estar ACIMA dos connects com os slots. ------------
+
+        self.retranslateUi(MainWindow)
+        self.pushButton_multiple_input.clicked.connect(self.select_input_directory)
+        self.pushButton_multiple_output.clicked.connect(self.select_output_directory)
+        self.dateEdit_multiple_start.dateChanged.connect(self.change_start_date_multiple)
+        self.dateEdit_multiple_end.dateChanged.connect(self.change_end_date_multiple)
+        self.pushButton_multiple_emit.clicked.connect(self.emit_multiple)
+        self.pushButton_singular_select_output.clicked.connect(self.select_output_directory)
+        self.dateEdit_singular_start.dateChanged.connect(self.change_start_date_singular)
+        self.dateEdit_singular_end.dateChanged.connect(self.change_end_date_singular)
+        self.pushButton_singular_emit.clicked.connect(self.emit_singular)
+        self.pushButton_config_cobertura_source.clicked.connect(self.change_coberturas_file)
+        self.pushButton_config_cnv_source.clicked.connect(self.change_cnv_file)
+        self.pushButton_config_change_pdf_template.clicked.connect(self.change_pdf_template)
+        self.pushButton_config_source.clicked.connect(self.change_default_data_source)
+        self.pushButton_config_output_dir.clicked.connect(self.change_default_output_dir)
+        self.horizontalSlider_config_max_threads.valueChanged.connect(self.label_config_max_thread_number.setNum)
+        self.horizontalSlider_config_target_threads.valueChanged.connect(self.label_config_target_thread_number.setNum)
+        self.horizontalSlider_config_max_processes.valueChanged.connect(self.label_config_max_processes_number.setNum)
+        self.pushButton_config_confirm.clicked.connect(self.change_configs)
+
+        self.pushButton_multiple_output.setDefault(False)
+
+        QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        self.pushButton_multiple_input.setText(QCoreApplication.translate("MainWindow", u"Selecionar arquivo", None))
+        self.label_multiple_input_header.setText(QCoreApplication.translate("MainWindow", u"Arquivo selecionado:", None))
+        self.label_multiple_input_text.setText("")
+        self.pushButton_multiple_output.setText(QCoreApplication.translate("MainWindow", u"Selecionar diret\u00f3rio\n"
+"de destino", None))
+        self.label_multiple_output_header.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio de destino selecionado:", None))
+        self.label_multiple_output_text.setText("")
+        self.pushButton_multiple_emit.setText(QCoreApplication.translate("MainWindow", u"Emitir", None))
+        self.label_multiple_start.setText(QCoreApplication.translate("MainWindow", u"In\u00edcio da vig\u00eancia:", None))
+        self.label_multiple_end.setText(QCoreApplication.translate("MainWindow", u"Final da vig\u00eancia:", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_multiple), QCoreApplication.translate("MainWindow", u"M\u00faltiplos", None))
+        self.label_singular_name.setText(QCoreApplication.translate("MainWindow", u"Nome:", None))
+        self.label_singular_cpf.setText(QCoreApplication.translate("MainWindow", u"CPF:", None))
+        self.label_singular_matricula.setText(QCoreApplication.translate("MainWindow", u"Matr\u00edcula:", None))
+        self.label_singular_cnpj.setText(QCoreApplication.translate("MainWindow", u"CNPJ:", None))
+        self.label_singular_apolice.setText(QCoreApplication.translate("MainWindow", u"Ap\u00f3lice:", None))
+        self.label_singular_client.setText(QCoreApplication.translate("MainWindow", u"Cliente:", None))
+        self.label_singular_startdate.setText(QCoreApplication.translate("MainWindow", u"In\u00edcio de vig\u00eancia:", None))
+        self.label_singular_enddate.setText(QCoreApplication.translate("MainWindow", u"Fim de vig\u00eancia:", None))
+        self.pushButton_singular_select_output.setText(QCoreApplication.translate("MainWindow", u"Selecionar diret\u00f3rio de destino", None))
+        self.label_singular_output_header.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio selecionado:", None))
+        self.label_singular_output_text.setText("")
+        self.pushButton_singular_emit.setText(QCoreApplication.translate("MainWindow", u"Emitir", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_singular), QCoreApplication.translate("MainWindow", u"Individual", None))
+        self.label_config_max_threads.setText(QCoreApplication.translate("MainWindow", u"Quantidade m\u00e1xima de threads:", None))
+        self.label_config_target_threads.setText(QCoreApplication.translate("MainWindow", u"Quantidade alvo de threads:", None))
+        self.label_config_max_processes.setText(QCoreApplication.translate("MainWindow", u"Quantiade m\u00e1xima de processos:", None))
+        self.pushButton_config_cobertura_source.setText(QCoreApplication.translate("MainWindow", u"Trocar arquivo de coberturas", None))
+        self.label_config_selection_cobertura.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
+        self.label_config_cobertura_text.setText("")
+        self.pushButton_config_cnv_source.setText(QCoreApplication.translate("MainWindow", u"Trocar arquivo de c\u00f3digos CNV", None))
+        self.label_config_selection_cnv.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
+        self.label_config_cnv_text.setText("")
+        self.pushButton_config_change_pdf_template.setText(QCoreApplication.translate("MainWindow", u"Trocar PDF modelo", None))
+        self.label_config_selection_pdf.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
+        self.label_config_pdf_text.setText("")
+        self.label_config_start_date.setText(QCoreApplication.translate("MainWindow", u"Data de vig\u00eancia inicial padr\u00e3o:", None))
+        self.label_config_end_date.setText(QCoreApplication.translate("MainWindow", u"Data de vig\u00eancia final padr\u00e3o", None))
+        self.pushButton_config_source.setText(QCoreApplication.translate("MainWindow", u"Trocar fonte de dados padr\u00e3o", None))
+        self.label_config_selection_data_source.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
+        self.label_config_source_text.setText("")
+        self.pushButton_config_output_dir.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio padr\u00e3o de salvamento", None))
+        self.label_config_selection_output_dir.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
+        self.label_config_output_dir_text.setText("")
+        self.pushButton_config_confirm.setText(QCoreApplication.translate("MainWindow", u"Aplicar", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_config), QCoreApplication.translate("MainWindow", u"Configura\u00e7\u00f5es", None))
+        self.label_console.setText("")
+
+        # Coisas adicionadas manualmente. ------------------------------------------------------------------------------
+        self.label_config_target_thread_number.setText(QCoreApplication.translate("MainWindow", f"{var.target_threads}", None))
+        self.label_config_max_processes_number.setText(QCoreApplication.translate("MainWindow", f"{var.max_processes}", None))
+        self.label_config_max_thread_number.setText(QCoreApplication.translate("MainWindow", f"{var.max_threads}", None))
 
     def select_input_directory(self):
         var.data_dir = QFileDialog.getOpenFileName()[0]
-        self.input_label.setText(var.data_dir)
+        self.label_multiple_input_text.setText(var.data_dir)
 
     def select_output_directory(self):
         var.output_dir = QFileDialog.getExistingDirectory() + '/'
-        self.output_multiple_label.setText(var.output_dir)
-        self.output_label.setText(var.output_dir)
+        self.label_multiple_output_text.setText(var.output_dir)
+        self.label_singular_output_text.setText(var.output_dir)
 
     def change_start_date_multiple(self):
-        day = str(self.start_date_multiple_dateedit.date().day())
-        mon = str(self.start_date_multiple_dateedit.date().month())
-        yea = str(self.start_date_multiple_dateedit.date().year())
+        day = str(self.dateEdit_multiple_start.date().day())
+        mon = str(self.dateEdit_multiple_start.date().month())
+        yea = str(self.dateEdit_multiple_start.date().year())
 
         if len(day) < 2: day = '0' + day
         if len(mon) < 2: mon = '0' + mon
 
         var.start_period = day + '/' + mon + '/' + yea
-        self.start_date_singular_dateedit.setDate(self.start_date_multiple_dateedit.date())
+        self.dateEdit_singular_start.setDate(self.dateEdit_multiple_start.date())
+
+        if self.dateEdit_multiple_start.date() > self.dateEdit_multiple_end.date():  # Se trocar a data inicial para depois da data final, troque a final tamb�m.
+            self.dateEdit_multiple_end.setDate(self.dateEdit_multiple_start.date())
+            self.change_end_date_multiple()
 
     def change_end_date_multiple(self):
-        day = str(self.end_date_multiple_dateedit.date().day())
-        mon = str(self.end_date_multiple_dateedit.date().month())
-        yea = str(self.end_date_multiple_dateedit.date().year())
+        day = str(self.dateEdit_multiple_end.date().day())
+        mon = str(self.dateEdit_multiple_end.date().month())
+        yea = str(self.dateEdit_multiple_end.date().year())
 
         if len(day) < 2: day = '0' + day
         if len(mon) < 2: mon = '0' + mon
 
         var.end_period = day + '/' + mon + '/' + yea
-        self.end_date_singular_dateedit.setDate(self.end_date_multiple_dateedit.date())
+        self.dateEdit_singular_end.setDate(self.dateEdit_multiple_end.date())
+
+        if self.dateEdit_multiple_end.date() < self.dateEdit_multiple_start.date():  # Se trocar a data final para antes da data inicial, troque a inicial tamb�m.
+            self.selfdateEdit_multiple_start.setDate(self.dateEdit_multiple_end.date())
+            self.change_start_date_multiple()
 
     def change_start_date_singular(self):
-        day = str(self.start_date_singular_dateedit.date().day())
-        mon = str(self.start_date_singular_dateedit.date().month())
-        yea = str(self.start_date_singular_dateedit.date().year())
+        day = str(self.dateEdit_singular_start.date().day())
+        mon = str(self.dateEdit_singular_start.date().month())
+        yea = str(self.dateEdit_singular_start.date().year())
 
         if len(day) < 2: day = '0' + day
         if len(mon) < 2: mon = '0' + mon
 
         var.start_period = day + '/' + mon + '/' + yea
-        self.start_date_multiple_dateedit.setDate(self.start_date_singular_dateedit.date())
+        self.dateEdit_multiple_start.setDate(self.dateEdit_singular_start.date())
+
+        if self.dateEdit_singular_start.date() > self.dateEdit_singular_end.date():  # Se trocar a data inicial para depois da data final, troque a final tamb�m.
+            self.dateEdit_singular_end.setDate(self.dateEdit_singular_start.date())
+            self.change_end_date_singular()
 
     def change_end_date_singular(self):
-        day = str(self.end_date_singular_dateedit.date().day())
-        mon = str(self.end_date_singular_dateedit.date().month())
-        yea = str(self.end_date_singular_dateedit.date().year())
+        day = str(self.dateEdit_singular_end.date().day())
+        mon = str(self.dateEdit_singular_end.date().month())
+        yea = str(self.dateEdit_singular_end.date().year())
 
         if len(day) < 2: day = '0' + day
         if len(mon) < 2: mon = '0' + mon
 
         var.end_period = day + '/' + mon + '/' + yea
-        self.end_date_multiple_dateedit.setDate(self.end_date_singular_dateedit.date())
+        self.dateEdit_multiple_end.setDate(self.dateEdit_singular_end.date())
+
+        if self.dateEdit_singular_end.date() < self.dateEdit_singular_start.date():  # Se trocar a data final para antes da data inicial, troque a inicial tamb�m.
+            self.dateEdit_singular_start.setDate(self.dateEdit_singular_end.date())
+            self.change_start_date_singular()
 
     def update_progress_bar(self):
         while var.progress < var.max_progress:
-            self.progressBar.setValue(100 * var.progress / var.max_progress)
+            self.progressBar_multiple.setValue(100 * var.progress / var.max_progress)
             sleep(0.001)
 
         while var.certificates_per_second == 0 or var.emission_time == 0:
             sleep(0.001)
 
-        self.progressBar.setValue(0)
-        self.emission_button.setEnabled(True)
-        self.emit_button.setEnabled(True)
+        self.progressBar_multiple.setValue(0)
+        self.pushButton_multiple_emit.setEnabled(True)
+        self.pushButton_singular_emit.setEnabled(True)
 
-        self.speed_label.setText(f"{var.certificates_per_second:.2f} certificados por segundo")
-        self.time_label.setText(f"{var.emission_time / 60:.2f} minutos")
-        var.certificates_per_second == 0
-        var.emission_time == 0
+        self.label_console.setText(
+            f'Tempo de para emitir {var.max_progress} certificados: {var.emission_time / 60:.2f} minutos | Velocidade: {var.certificates_per_second:.2f} certificados por segundo')
+        var.certificates_per_second = 0
+        var.emission_time = 0
 
     def emit_multiple(self):
-
-        self.emission_button.setEnabled(False)
-        self.emit_button.setEnabled(False)
+        self.pushButton_multiple_emit.setEnabled(False)
+        self.pushButton_singular_emit.setEnabled(False)
 
         progress_thread = Thread(target=self.update_progress_bar, daemon=True)
         emission_thread = Thread(target=emit_from_source)
@@ -598,18 +807,17 @@ class Ui_Widget(object):
         emission_thread.start()
 
     def select_item(self):
-        self.cobertura_label.setText(self.coberturas_list.selectedItems()[0].text())
+        self.label_console.setText(self.listWidget_singular_cobertura.selectedItems()[0].text())
 
     def emit_singular(self):
-
-        name = self.name_lineedit.text()
-        cpf = self.cpf_lineedit.text()
-        cnpj = self.cnpj_lineedit.text()
-        clie = self.client_lineedit.text()
-        matr = self.matricula_lineedit.text()
-        apol = self.apolice_lineedit.text()
+        name = self.lineEdit_singular_name.text()
+        cpf = self.lineEdit_singular_cpf.text()
+        cnpj = self.lineEdit_singular_cnpj.text()
+        clie = self.lineEdit_singular_client.text()
+        matr = self.lineEdit_singular_matricula.text()
+        apol = self.lineEdit_singular_apolice.text()
         try:
-            cobe = self.coberturas_list.selectedItems()[0].text()
+            cobe = self.listWidget_singular_cobertura.selectedItems()[0].text()
         except (AttributeError, IndexError):
             cobe = ''
 
@@ -629,7 +837,7 @@ class Ui_Widget(object):
 
         elif any(char.isalpha() for char in apol):
             warning = QMessageBox()
-            warning.setText('Não digite letras na apólice.')
+            warning.setText('Não digite letras na ap�lice.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
@@ -699,4 +907,125 @@ class Ui_Widget(object):
 
         else:
             emit_singular(name, cpf, cnpj, matr, clie, apol, cobe, cnv='')
-            self.success_label.setText(f'arquivo {var.progress} - {nm(name)} emitido com êxito.')
+            self.label_console.setText(f'arquivo {cp(cpf)} - {nm(name)} emitido com êxito.')
+
+    def change_coberturas_file(self):
+        file = QFileDialog.getOpenFileName()[0]
+        if file[-4:].lower() in ('xlsx', '.xls', '.csv', 'xlsm'):
+            var.coberturas_path_tweak = file
+            self.label_config_cobertura_text.setText(file)
+
+        else:
+            warning = QMessageBox()
+            warning.setText('Extensão de arquivo não permitida')
+            warning.setIcon(QMessageBox.Icon.Warning)
+            warning.setWindowTitle('AVISO')
+            warning.exec()
+
+    def change_cnv_file(self):
+        file = QFileDialog.getOpenFileName()[0]
+        if file[-4:].lower() in ('xlsx', '.xls', '.csv', 'xlsm'):
+            var.cnv_path_tweak = file
+            self.label_config_cnv_text.setText(file)
+
+        else:
+            warning = QMessageBox()
+            warning.setText('Extensão de arquivo não permitida')
+            warning.setIcon(QMessageBox.Icon.Warning)
+            warning.setWindowTitle('AVISO')
+            warning.exec()
+
+    def change_pdf_template(self):
+        file = QFileDialog.getOpenFileName()[0]
+        if file[-4:].lower() == '.pdf':
+            var.template_tweak = file
+            self.label_config_pdf_text.setText(file)
+
+        else:
+            warning = QMessageBox()
+            warning.setText('Apenas arquivos PDFs são permitidos')
+            warning.setIcon(QMessageBox.Icon.Warning)
+            warning.setWindowTitle('AVISO')
+            warning.exec()
+
+    def change_default_data_source(self):
+        file = QFileDialog.getOpenFileName()[0]
+        if file[-4:].lower() in ('xlsx', '.xls', '.csv', 'xlsm'):
+            var.data_dir_tweak = file
+            self.label_config_source_text.setText(file)
+
+        else:
+            warning = QMessageBox()
+            warning.setText('Extensão de arquivo não permitida')
+            warning.setIcon(QMessageBox.Icon.Warning)
+            warning.setWindowTitle('AVISO')
+            warning.exec()
+
+    def change_default_output_dir(self):
+        var.output_dir_tweak = QFileDialog.getExistingDirectory() + '/'
+        self.label_config_output_dir_text.setText(var.output_dir_tweak)
+
+    def change_configs(self):
+
+        # Coletando a data para a nova data inicial padrão
+        if self.dateEdit_config_start.date() > self.dateEdit_config_end.date():  # Não deixa que a data inicial seja após a data final.
+            day = str(self.dateEdit_config_start.date().day())
+            mon = str(self.dateEdit_config_start.date().month())
+            yea = str(self.dateEdit_config_start.date().year())
+            if len(day) < 2: day = '0' + day
+            if len(mon) < 2: mon = '0' + mon
+            var.start_period_tweak = day + '/' + mon + '/' + yea
+
+            var.end_period_tweak = var.start_period_tweak
+            self.dateEdit_config_end.setDate(self.dateEdit_config_start.date())
+
+        else:
+            day = str(self.dateEdit_config_start.date().day())
+            mon = str(self.dateEdit_config_start.date().month())
+            yea = str(self.dateEdit_config_start.date().year())
+            if len(day) < 2: day = '0' + day
+            if len(mon) < 2: mon = '0' + mon
+            var.start_period_tweak = day + '/' + mon + '/' + yea
+
+            # Coletando a data para a nova data final padrão
+            day = str(self.dateEdit_config_end.date().day())
+            mon = str(self.dateEdit_config_end.date().month())
+            yea = str(self.dateEdit_config_end.date().year())
+            if len(day) < 2: day = '0' + day
+            if len(mon) < 2: mon = '0' + mon
+            var.end_period_tweak = day + '/' + mon + '/' + yea
+
+        # Coleta os valores para threads e processos máximos e número de threads alvo.
+        var.max_threads_tweak = self.horizontalSlider_config_max_threads.value()
+        var.target_threads_tweak = self.horizontalSlider_config_target_threads.value()
+        var.max_processes_tweak = self.horizontalSlider_config_max_processes.value()
+
+        # Não permite que o número alvo de threads seja maior que o permitido
+        if var.target_threads_tweak > var.max_threads_tweak:
+            var.max_threads_tweak = var.target_threads_tweak
+            self.horizontalSlider_config_max_threads.setValue(var.target_threads_tweak)
+            self.label_config_max_thread_number.setNum(var.target_threads_tweak)
+
+        if var.max_threads_tweak     is not None : var.max_threads     =     var.max_threads_tweak
+        if var.max_processes_tweak   is not None : var.max_processes   =   var.max_processes_tweak
+        if var.target_threads_tweak  is not None : var.target_threads  =  var.target_threads_tweak
+        if var.data_dir_tweak        is not None : var.data_dir        =        var.data_dir_tweak
+        if var.output_dir_tweak      is not None : var.output_dir      =      var.output_dir_tweak
+        if var.start_period_tweak    is not None : var.start_period    =    var.start_period_tweak
+        if var.end_period_tweak      is not None : var.end_period      =      var.end_period_tweak
+        if var.coberturas_path_tweak is not None : var.coberturas_path = var.coberturas_path_tweak
+        if var.cnv_path_tweak        is not None : var.cnv_path        =        var.cnv_path_tweak
+        if var.template_tweak        is not None : var.template        =        var.template_tweak
+
+        save_configs()
+
+        var.max_threads_tweak     = None
+        var.max_processes_tweak   = None
+        var.target_threads_tweak  = None
+        var.data_dir_tweak        = None
+        var.output_dir_tweak      = None
+        var.start_period_tweak    = None
+        var.end_period_tweak      = None
+        var.coberturas_path_tweak = None
+        var.cnv_path_tweak        = None
+        var.template_tweak        = None

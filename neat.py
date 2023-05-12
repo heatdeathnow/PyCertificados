@@ -1,5 +1,5 @@
-from unidecode import unidecode
 from numpy import trunc, float64, int64
+from unidecode import unidecode
 from pandas import isna
 
 

@@ -1,0 +1,10 @@
+n_threads   ;150
+n_processes ;4
+n_target    ;50
+data_dir    ;Dados para emissão.xlsx
+output_dir  ;Certificados/
+start_date  ;01/05/2023
+end_date    ;31/05/2023
+cobertura   ;dados/coberturas.xlsx
+cnv         ;dados/cnv.xlsx
+template    ;dados/modelo.pdf
