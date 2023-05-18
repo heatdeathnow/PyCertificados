@@ -1,60 +1,42 @@
-from PySide6.QtWidgets import QMessageBox
 from pandas import read_excel, read_csv
+from yaml import safe_load, safe_dump
 from multiprocessing import Process
+from unidecode import unidecode
 from time import time
 import var
 
 
 # Função load usada exclusivamente para multiprocessamento. Em vez de retornar o valor, ele o salva numa variável multiprocessamento no módulo var.
 class SubLoader(Process):
-    def __init__(self, path, skiprows, nrows, i, mlist, lock, headers=False):
+    def __init__(self, path, skiprows, nrows, i, mlist, lock):
         super().__init__()
         self.path = path
         self.skiprows = skiprows
         self.nrows = nrows
         self.i = i
         self.list = mlist
-        self.headers = headers
         self.lock = lock
         self.loadtime = time()
 
     def run(self):
-        if self.headers:
-            if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
-                with self.lock:
-                    self.list[self.i] = read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows)
+        if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
+            with self.lock:
+                self.list[self.i] = read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows, header=None)
 
-            elif self.path[-4:] == ".csv":
-                with self.lock:
-                    self.list[self.i] = read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';')
-
-        else:
-            if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
-                with self.lock:
-                    self.list[self.i] = read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows, header=None)
-
-            elif self.path[-4:] == ".csv":
-                with self.lock:
-                    self.list[self.i] = read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';', header=None)
+        elif self.path[-4:] == ".csv":
+            with self.lock:
+                self.list[self.i] = read_csv(self.path, skiprows=self.skiprows, nrows=self.nrows, sep=';', header=None)
 
         print(f'Tempo levado para o {self.i + 1}º processo carregar {len(self.list[self.i].index)} linhas na memória: {(time() - self.loadtime):.2f} segundos.')
 
 
 # Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
-def load(path, headers=True, **kwargs):
-    if headers:
-        if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return read_excel(path, **kwargs)
+def load(path, **kwargs):
+    if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
+        return read_excel(path, **kwargs)
 
-        elif path[-4:] == ".csv":
-            return read_csv(path, sep=';', **kwargs)
-
-    else:
-        if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
-            return read_excel(path, header=None, **kwargs)
-
-        elif path[-4:] == ".csv":
-            return read_csv(path, sep=';', header=None, **kwargs)
+    elif path[-4:] == ".csv":
+        return read_csv(path, sep=';', **kwargs)
 
 
 # Lê todos os códigos de cobertura num arquivo externo e retorna a relação cifras-coberturas num dataframe (usado para a emissão de múltiplos certificados).
@@ -68,7 +50,7 @@ def get_cnv(path):
 
 # Lê um arquivo externo com todas as possibilidades de coberturas (usado para a emissão de certificados individuais).
 def get_coberturas(path):
-    df = load(path, False)
+    df = load(path, header=None)
     df.columns = df.iloc[0]
     cobe = []
 
@@ -106,105 +88,78 @@ def get_headers(path):
 
     for column in df.columns:
 
-        if ('nome' in column.lower().strip() or 'segurado' in column.lower().strip()) and not nome_found:
+        if any(key in unidecode(column.lower().strip()) for key in var.name_keywords) and not nome_found:  # Se qualquer chave na lista de chaves é contida nessa coluna, então é a coluna certa.
             headers['name'] = df.columns.get_loc(column)
             nome_found = True
 
-        elif 'cpf' in column.lower().strip() and not cpf_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.cpf_keywords) and not cpf_found:  # Em todas essas iterações, lê se o nome da coluna em minísculo e se acentos.
             headers['cpf'] = df.columns.get_loc(column)
             cpf_found = True
 
-        elif 'cnpj' in column.lower().strip() and not cnpj_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.cnpj_keywords) and not cnpj_found:
             headers['cnpj'] = df.columns.get_loc(column)
             cnpj_found = True
 
-        elif 'cliente' in column.lower().strip() and not clie_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.cliente_keywords) and not clie_found:
             headers['clie'] = df.columns.get_loc(column)
             clie_found = True
 
-        elif ('matricula' in column.lower().strip() or 'matrícula' in column.lower().strip()) and not matr_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.matricula_keywords) and not matr_found:
             headers['matr'] = df.columns.get_loc(column)
             matr_found = True
 
-        elif 'cobertura' in column.lower().strip() and not cobe_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.cobertura_keywords) and not cobe_found:
             headers['cobe'] = df.columns.get_loc(column)
             cobe_found = True
 
-        elif 'cnv' in column.lower().strip() and not cnv_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.cnv_keywords) and not cnv_found:
             headers['cnv'] = df.columns.get_loc(column)
             cnv_found = True
 
-        elif ('apolice' in column.lower().strip() or 'apólice' in column.lower().strip()) and not apol_found:
+        elif any(key in unidecode(column.lower().strip()) for key in var.apolice_keywords) and not apol_found:
             headers['apol'] = df.columns.get_loc(column)
             apol_found = True
-
-    if headers['name'] == '':
-        warning = QMessageBox()
-        warning.setText('Campo "nome" não foi encontrado na planilha')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
-
-    if headers['cpf'] == '':
-        warning = QMessageBox()
-        warning.setText('Campo "CPF" não foi encontrado na planilha')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
-
-    if headers['cnpj'] == '':
-        warning = QMessageBox()
-        warning.setText('Campo "CNPJ" não foi encontrado na planilha')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
-
-    if headers['clie'] == '':
-        warning = QMessageBox()
-        warning.setText('Campo "cliente" não foi encontrado na planilha')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
-
-    if headers['matr'] == '':
-        warning = QMessageBox()
-        warning.setText('Campo "matricula" não foi encontrado na planilha')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
-
-    if headers['cobe'] == '' and headers['cnv'] == '':
-        warning = QMessageBox()
-        warning.setText('Pelo menos uma das colunas deve existir na planilha:\n'
-                        '"CNV" ou "cobertura"')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
-
-    if headers['apol'] == '':
-        warning = QMessageBox()
-        warning.setText('Campo "apolice" não foi encontrado na planilha')
-        warning.setIcon(QMessageBox.Icon.Warning)
-        warning.setWindowTitle('AVISO')
-        warning.exec()
 
     return headers  # Retorna um dicionário contendo os índices das colunas que contém os dados que serão usados.
 
 
-def save_configs():
-    with open('dados/configs', 'w') as file:
+def emergency_save():
+    with open('dados/init.yaml', 'w') as file:
+        safe_dump({
+            'max_threads'        :        var.max_threads,
+            'max_processes'      :      var.max_processes,
+            'target_threads'     :     var.target_threads,
+            'data_dir'           :           var.data_dir,
+            'output_dir'         :         var.output_dir,
+            'start_period'       :       var.start_period,
+            'end_period'         :         var.end_period,
+            'cobertura_dir'      :      var.cobertura_dir,
+            'cnv_dir'            :            var.cnv_dir,
+            'template_dir'       :       var.template_dir,
+            'dist_left'          :          var.dist_left,
+            'text_height'        :        var.text_height,
+            'line_space'         :         var.line_space,
+            'max_chars'          :          var.max_chars,
+            'base_text'          :          var.base_text,
+            'name_keywords'      :      var.name_keywords,
+            'cpf_keywords'       :       var.cpf_keywords,
+            'cnpj_keywords'      :      var.cnpj_keywords,
+            'matricula_keywords' : var.matricula_keywords,
+            'cliente_keywords'   :   var.cliente_keywords,
+            'apolice_keywords'   :   var.apolice_keywords,
+            'cobertura_keywords' : var.cobertura_keywords,
+            'cnv_keywords'       :       var.cnv_keywords,
+        }, file)
 
-        rows = [
-            f'n_threads   ;{var.max_threads}\n',
-            f'n_processes ;{var.max_processes}\n',
-            f'n_target    ;{var.target_threads}\n',
-            f'data_dir    ;{var.data_dir}\n',
-            f'output_dir  ;{var.output_dir}\n',
-            f'start_date  ;{var.start_period}\n',
-            f'end_date    ;{var.end_period}\n',
-            f'cobertura   ;{var.coberturas_path}\n',
-            f'cnv         ;{var.cnv_path}\n',
-            f'template    ;{var.template}',
-        ]
 
-        file.writelines(rows)
+def push(name, value):
+    with open('dados/init.yaml', 'r') as file:
+        dic = safe_load(file.read())
+
+    dic[name] = value
+
+    with open('dados/init.yaml', 'w') as file:
+        safe_dump(dic, file)
+
+
+if var.load_problem : emergency_save()  # Depois que os dois módulos estiverem carregados, se houve erro de carregamento, salve os novos valores.

@@ -67,7 +67,7 @@ def matr(x):
 
 
 def cnv(x):
-    if isna(x) or x == 'GERENTES':
+    if isna(x) or type(x) == str:
         return 'GERENTES'
 
     elif type(x) in (float64, int64, int):

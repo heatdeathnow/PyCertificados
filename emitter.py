@@ -3,8 +3,7 @@ from reportlab.pdfgen.canvas import Canvas
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
 from openpyxl import load_workbook
-from threading import Thread
-from time import time, sleep
+from time import sleep, time
 from pdfrw import PdfReader
 from textwrap import wrap
 from pandas import concat
@@ -14,7 +13,7 @@ import neat
 import var
 
 
-template = PdfReader(var.template, decompress=False)
+template = PdfReader(var.template_dir, decompress=False)
 template_obj = pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
 
 
@@ -22,38 +21,42 @@ template_obj = pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
 def emit_singular(name, cpf, cnpj, matr, clie, apol, cobe='', cnv=''):
     with var.lock:
         var.progress += 1
+        text = var.base_text  # Copia o texto base para uma variável nesse processo.
+
+    # Substitui todos os campos dinâmicos pelos seus respectivos valores nessa instância.
+    text = text.replace('<NOME>', neat.name(name))
+    text = text.replace('<CPF>', neat.cpf(cpf))
+    text = text.replace('<CNPJ>', neat.cnpj(cnpj))
+    text = text.replace('<MATRICULA>', neat.matr(matr))
+    text = text.replace('<CLIENTE>', str(clie))
+    text = text.replace('<APOLICE>', str(apol))
+    text = text.replace('<COMECO>', f'{var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}')
+    text = text.replace('<FINAL>', f'{var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}')
 
     if cobe != '':
-        text = f"Informamos que o segurado ativo pelo CNPJ: {neat.cnpj(cnpj)}, Apólice: {apol} " \
-               f"Nome: {neat.name(name)}, CPF: {neat.cpf(cpf)}, Matrícula: {neat.matr(matr)}, contratado pelo " \
-               f"cliente {clie}, consta ativo na apólice do seguro de vida em grupo com as coberturas: {cobe}, " \
-               f"com vigência das 24:00h de {var.start_period} Até 24:00h de {var.end_period}."
+        text = text.replace('<COBERTURA>', cobe)
 
     else:
-        text = f"Informamos que o segurado ativo pelo CNPJ: {neat.cnpj(cnpj)}, Apólice: {apol} " \
-               f"Nome: {neat.name(name)}, CPF: {neat.cpf(cpf)}, Matrícula: {neat.matr(matr)}, contratado pelo " \
-               f"cliente {clie}, consta ativo na apólice do seguro de vida em grupo com as coberturas: {cnv}, " \
-               f"com vigência das 24:00h de {var.start_period} Até 24:00h de {var.end_period}."
+        text = text.replace('<COBERTURA>', cnv)
 
     canvas = Canvas(f'{var.output_dir}{neat.cpf(cpf)} - {neat.name(name)}.pdf')  # Objeto do texto a ser salvo.
 
     xobj_name = makerl(canvas, template_obj)  # Superposição objeto modelo com o objeto escritor por cima.
     canvas.doForm(xobj_name)
 
-    lines = wrap(text, 80)  # Quebra o texto contínuo em linha com no máximo segundo parâmetro de caracteres.
-    y = 620  # Altura inicial do texto no PDF
-    x = 65  # Distância do texto à esquerda do PDF
+    lines = wrap(text, var.max_chars)  # Quebra o texto contínuo em linha com no máximo segundo parâmetro de caracteres.
 
+    y = var.text_height
     for line in lines:
-        canvas.drawString(x, y, line)  # Escreve a linha por cima do modelo.
-        y -= 15  # Espaçamento entre as linhas
+        canvas.drawString(var.dist_left, y, line)  # Escreve a linha por cima do modelo.
+        y -= var.line_space  # Espaçamento entre as linhas
 
     canvas.save()  # Função I/O-intensiva para salvar o arquivo da memória para o armazenamento do computador.
 
 
 def emit_from_source():  # Função para emitir diversos certificados advindos de uma fonte de dados externa.
     start_time = time()  # Horário do começo da emissão.
-    cnv = get_cnv(var.cnv_path)
+    cnv = get_cnv(var.cnv_dir)
 
     # Abre a planilha no modo leitura otimizada para obter o número de linhas e então fechá-la.
     row_count_time = time()
@@ -64,31 +67,32 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     print(f'Tempo necessário para calcular que há {row_count} linhas na planilha: {(time() - row_count_time):.2f} segundos.')
 
     var.max_progress = row_count
+    if row_count > 1000 and var.max_processes != 1:
+        # Sabendo o número total de linhas, divide-se o trabalho de carregá-las na memória através de multiprocessamento.
+        quotient = floor(var.max_progress / var.max_processes)  # Número de linhas que cada processo irá carregar na memória.
+        remainder = var.max_progress % var.max_processes  # Número de linhas a mais que o último processo carregará na memória.
+        processes = []
 
-    # Sabendo o número total de linhas, divide-se o trabalho de carregá-las na memória através de multiprocessamento.
-    quotient = floor(var.max_progress / var.max_processes)  # Número de linhas que cada processo irá carregar na memória.
-    remainder = var.max_progress % var.max_processes  # Número de linhas a mais que o último processo carregará na memória.
-    processes = []
+        for i in range(var.max_processes):
+            if i == range(var.max_processes)[-1]:  # Se estiver na última iteração, dê a sobra de linhas para o último processo.
+                processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient + remainder, i, var.shared_list, var.lock))
 
-    for i in range(var.max_processes):
-        if i == range(var.max_processes)[-1]:  # Se estiver na última iteração, dê a sobra de linhas para o último processo.
-            processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient + remainder, i, var.shared_list, var.lock))
-        
-        elif i == 0:  # Primeira linha. Em todos os casos deve-se adicionar mais 1, pois senão há overlapping
-            processes.append(SubLoader(var.data_dir, 1, quotient, i, var.shared_list, var.lock))
+            elif i == 0:  # Primeira linha. Em todos os casos deve-se adicionar mais 1, pois senão há overlapping
+                processes.append(SubLoader(var.data_dir, 1, quotient, i, var.shared_list, var.lock))
 
-        else:  # Senão, dê apenas o quociente da divisão para esses processos que não são o último.
-            processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient, i, var.shared_list, var.lock))
+            else:  # Senão, dê apenas o quociente da divisão para esses processos que não são o último.
+                processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient, i, var.shared_list, var.lock))
 
-        processes[i].start()
+            processes[i].start()
 
-    for i in range(var.max_processes):
-        processes[i].join()  # Espera todos os processos carregarem suas seções de dados na memória para então continuar o programa.
+        for i in range(var.max_processes):
+            processes[i].join()  # Espera todos os processos carregarem suas seções de dados na memória para então continuar o programa.
 
-    headers = get_headers(var.data_dir)  # Obtém a posição de cada coluna de dados importantes na planilha.
+        df = concat(var.shared_list[:], ignore_index=True)  # Junta todas as partes num inteiro.
+        var.shared_list = var.manager.list(range(var.max_processes))  # Deleta os fragmentos de dados depois de serem utilizados.
 
-    df = concat(var.shared_list[:], ignore_index=True)  # Junta todas as partes num inteiro.
-    var.shared_list = var.manager.list(range(var.max_processes))  # Deleta os fragmentos de dados depois de serem utilizados.
+    else:
+        df = load(var.data_dir, header=None, skiprows=1)
 
     threads = []
     emit_time = time()  # Usado para calcular o tempo total e velocidade média do processo de emissão.
@@ -106,14 +110,14 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
         elif needed <= 0:
             needed = 1
 
-        if headers['cobe'] != '' and active_count() < var.max_threads:
-            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, headers['name']],
-                                                              df.iloc[i, headers['cpf' ]],
-                                                              df.iloc[i, headers['cnpj']],
-                                                              df.iloc[i, headers['matr']],
-                                                              df.iloc[i, headers['clie']],
-                                                              df.iloc[i, headers['apol']],
-                                                              df.iloc[i, headers['cobe']],
+        if var.headers['cobe'] != '' and active_count() < var.max_threads:
+            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, var.headers['name']],
+                                                              df.iloc[i, var.headers['cpf' ]],
+                                                              df.iloc[i, var.headers['cnpj']],
+                                                              df.iloc[i, var.headers['matr']],
+                                                              df.iloc[i, var.headers['clie']],
+                                                              df.iloc[i, var.headers['apol']],
+                                                              df.iloc[i, var.headers['cobe']],
                                                               ''
                                                               )) for i in range(j, j + needed))
 
@@ -122,14 +126,14 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
             j += needed
 
         elif active_count() < var.max_threads:
-            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, headers['name']],
-                                                              df.iloc[i, headers['cpf' ]],
-                                                              df.iloc[i, headers['cnpj']],
-                                                              df.iloc[i, headers['matr']],
-                                                              df.iloc[i, headers['clie']],
-                                                              df.iloc[i, headers['apol']],
+            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, var.headers['name']],
+                                                              df.iloc[i, var.headers['cpf' ]],
+                                                              df.iloc[i, var.headers['cnpj']],
+                                                              df.iloc[i, var.headers['matr']],
+                                                              df.iloc[i, var.headers['clie']],
+                                                              df.iloc[i, var.headers['apol']],
                                                               '',
-                                                              cnv.loc[neat.cnv(df.iloc[i, headers['cnv']])]
+                                                              cnv.loc[neat.cnv(df.iloc[i, var.headers['cnv']])]
                                                               )) for i in range(j, j + needed))
 
             for i in range(1, needed + 1):
@@ -151,9 +155,10 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
         thread.join()
 
     del df
-    var.progress = 0
+
     var.emission_time = time() - start_time
     var.certificates_per_second = var.max_progress / var.emission_time
 
+    var.progress = 0
     print(f'Tempo levado para salvar {var.max_progress} arquivos PDF da memória para o disco: {(time() - emit_time) / 60:.2f} minutos')
     print(f'Velocidade média: {var.certificates_per_second:.2f}')

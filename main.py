@@ -1,7 +1,7 @@
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QMainWindow
 from multiprocessing import Manager
 from ui_form import Ui_MainWindow
-from sys import argv, exit
+from sys import exit
 import var
 
 
@@ -17,10 +17,9 @@ if __name__ == "__main__":
     var.shared_list = var.manager.list(range(var.max_processes))
     var.lock = var.manager.Lock()
 
-    app = QApplication(argv)
-
     widget = MainWindow()
+    var.widget = widget
     widget.setWindowTitle('Emissor de certificados')
     widget.show()
 
-    exit(app.exec())
+    exit(var.app.exec())
