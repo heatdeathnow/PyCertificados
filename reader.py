@@ -48,6 +48,17 @@ def get_cnv(path):
     return df
 
 
+def get_cnv_values(path):
+    df = load(path)
+    cnv = []
+    from pandas import isna
+    for i in range(len(df.index)):
+        if not isna(df.iloc[i][1]):
+            cnv.append(df.iloc[i][0])
+
+    return cnv
+
+
 # Lê um arquivo externo com todas as possibilidades de coberturas (usado para a emissão de certificados individuais).
 def get_coberturas(path):
     df = load(path, header=None)

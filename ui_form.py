@@ -1,8 +1,8 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QMetaObject, QSize, Qt)
 from PySide6.QtWidgets import (QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,
                                QProgressBar, QPushButton, QSizePolicy, QTabWidget, QWidget, QMessageBox, QFileDialog,
-                               QVBoxLayout, QFormLayout, QSlider, QScrollArea, QPlainTextEdit)
-from reader import get_coberturas, get_headers, push
+                               QVBoxLayout, QFormLayout, QSlider, QScrollArea, QPlainTextEdit, QComboBox, QCheckBox)
+from reader import get_coberturas, get_headers, get_cnv_values, push
 from emitter import emit_singular, emit_from_source
 from multiprocessing import cpu_count
 from threading import active_count
@@ -11,6 +11,7 @@ from unidecode import unidecode
 from threading import Thread
 from neat import name as nm
 from neat import cpf as cp
+from reader import get_cnv
 from time import sleep
 import var
 
@@ -194,6 +195,19 @@ class Ui_MainWindow(object):
         self.tab_singular.setObjectName(u"tab_singular")
         self.gridLayout_2 = QGridLayout(self.tab_singular)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.listWidget_singular_cobertura = QListWidget(self.tab_singular)
+        self.listWidget_singular_cobertura.setObjectName(u"listWidget_singular_cobertura")
+
+        self.gridLayout_2.addWidget(self.listWidget_singular_cobertura, 2, 0, 2, 1)
+
+        self.pushButton_singular_emit = QPushButton(self.tab_singular)
+        self.pushButton_singular_emit.setObjectName(u"pushButton_singular_emit")
+        self.pushButton_singular_emit.setMinimumSize(QSize(0, 40))
+        self.pushButton_singular_emit.setMaximumSize(QSize(200, 16777215))
+        self.pushButton_singular_emit.setAutoRepeat(False)
+
+        self.gridLayout_2.addWidget(self.pushButton_singular_emit, 3, 1, 1, 1)
+
         self.formLayout_singular_write = QFormLayout()
         self.formLayout_singular_write.setObjectName(u"formLayout_singular_write")
         self.label_singular_name = QLabel(self.tab_singular)
@@ -295,8 +309,10 @@ class Ui_MainWindow(object):
         self.formLayout_singular_write.setWidget(7, QFormLayout.FieldRole, self.dateEdit_singular_end)
 
 
-        self.gridLayout_2.addLayout(self.formLayout_singular_write, 1, 1, 1, 1)
+        self.gridLayout_2.addLayout(self.formLayout_singular_write, 2, 1, 1, 1)
 
+        self.verticalLayout_singular_output_and_cnv = QVBoxLayout()
+        self.verticalLayout_singular_output_and_cnv.setObjectName(u"verticalLayout_singular_output_and_cnv")
         self.horizontalLayout_singular_select_output = QHBoxLayout()
         self.horizontalLayout_singular_select_output.setObjectName(u"horizontalLayout_singular_select_output")
         self.pushButton_singular_select_output = QPushButton(self.tab_singular)
@@ -319,20 +335,31 @@ class Ui_MainWindow(object):
         self.horizontalLayout_singular_select_output.addWidget(self.label_singular_output_text)
 
 
-        self.gridLayout_2.addLayout(self.horizontalLayout_singular_select_output, 0, 0, 1, 2)
+        self.verticalLayout_singular_output_and_cnv.addLayout(self.horizontalLayout_singular_select_output)
 
-        self.listWidget_singular_cobertura = QListWidget(self.tab_singular)
-        self.listWidget_singular_cobertura.setObjectName(u"listWidget_singular_cobertura")
+        self.horizontalLayout_singular_select_cnv = QHBoxLayout()
+        self.horizontalLayout_singular_select_cnv.setObjectName(u"horizontalLayout_singular_select_cnv")
+        self.checkBox_singular_allow_cnv = QCheckBox(self.tab_singular)
+        self.checkBox_singular_allow_cnv.setObjectName(u"checkBox_singular_allow_cnv")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Maximum)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.checkBox_singular_allow_cnv.sizePolicy().hasHeightForWidth())
+        self.checkBox_singular_allow_cnv.setSizePolicy(sizePolicy6)
 
-        self.gridLayout_2.addWidget(self.listWidget_singular_cobertura, 1, 0, 2, 1)
+        self.horizontalLayout_singular_select_cnv.addWidget(self.checkBox_singular_allow_cnv)
 
-        self.pushButton_singular_emit = QPushButton(self.tab_singular)
-        self.pushButton_singular_emit.setObjectName(u"pushButton_singular_emit")
-        self.pushButton_singular_emit.setMinimumSize(QSize(0, 40))
-        self.pushButton_singular_emit.setMaximumSize(QSize(200, 16777215))
-        self.pushButton_singular_emit.setAutoRepeat(False)
+        self.comboBox_singular_cnv = QComboBox(self.tab_singular)
+        self.comboBox_singular_cnv.setObjectName(u"comboBox_singular_cnv")
+        self.comboBox_singular_cnv.setEnabled(False)
 
-        self.gridLayout_2.addWidget(self.pushButton_singular_emit, 2, 1, 1, 1)
+        self.horizontalLayout_singular_select_cnv.addWidget(self.comboBox_singular_cnv)
+
+
+        self.verticalLayout_singular_output_and_cnv.addLayout(self.horizontalLayout_singular_select_cnv)
+
+
+        self.gridLayout_2.addLayout(self.verticalLayout_singular_output_and_cnv, 0, 0, 1, 2)
 
         self.tabWidget.addTab(self.tab_singular, "")
         self.tab_config = QWidget()
@@ -639,12 +666,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_config_text_left.addWidget(self.horizontalSlider_config_text_left)
 
-        self.label_config_text__left_text = QLabel(self.scrollAreaWidgetContents)
-        self.label_config_text__left_text.setObjectName(u"label_config_text__left_text")
-        self.label_config_text__left_text.setMinimumSize(QSize(20, 0))
-        self.label_config_text__left_text.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_config_text_left_text = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_text_left_text.setObjectName(u"label_config_text_left_text")
+        self.label_config_text_left_text.setMinimumSize(QSize(20, 0))
+        self.label_config_text_left_text.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.horizontalLayout_config_text_left.addWidget(self.label_config_text__left_text)
+        self.horizontalLayout_config_text_left.addWidget(self.label_config_text_left_text)
 
 
         self.formLayout.setLayout(19, QFormLayout.FieldRole, self.horizontalLayout_config_text_left)
@@ -959,6 +986,12 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(0, QFormLayout.SpanningRole, self.label_config_performance_title)
 
+        self.label_config_keywords_description = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_keywords_description.setObjectName(u"label_config_keywords_description")
+        self.label_config_keywords_description.setWordWrap(True)
+
+        self.formLayout.setWidget(38, QFormLayout.SpanningRole, self.label_config_keywords_description)
+
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
         self.verticalLayout.addWidget(self.scrollArea)
@@ -970,7 +1003,10 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         # Coisas adicionadas manualmente, e não pelo PyCreator. --------------------------------------------------------
-        MainWindow.setWindowIcon(QIcon('dados/ícone.ico'))
+        try:
+            MainWindow.setWindowIcon(QIcon('dados/ícone.ico'))
+        except FileNotFoundError:
+            pass
         self.listWidget_singular_cobertura.addItems(get_coberturas(var.cobertura_dir))
         self.horizontalSlider_config_max_threads.setValue(var.max_threads)
         self.horizontalSlider_config_target_threads.setValue(var.target_threads)
@@ -1012,8 +1048,6 @@ class Ui_MainWindow(object):
         self.pushButton_config_change_pdf_template.clicked.connect(self.change_pdf_template)
         self.pushButton_config_source.clicked.connect(self.change_default_data_source)
         self.pushButton_config_output_dir.clicked.connect(self.change_default_output_dir)
-
-        # Aba de configurações
         self.horizontalSlider_config_max_threads.valueChanged.connect(self.change_max_threads)
         self.horizontalSlider_config_target_threads.valueChanged.connect(self.change_target_threads)
         self.horizontalSlider_config_max_processes.valueChanged.connect(self.change_max_processes)
@@ -1032,8 +1066,11 @@ class Ui_MainWindow(object):
         self.lineEdit_config_apolice.textEdited.connect(self.change_apolice_keywords)
         self.lineEdit_config_cobertura.textEdited.connect(self.change_cobertura_keywords)
         self.lineEdit_config_cnv.textEdited.connect(self.change_cnv_keywords)
+        self.checkBox_singular_allow_cnv.toggled.connect(self.listWidget_singular_cobertura.setDisabled)
+        self.checkBox_singular_allow_cnv.toggled.connect(self.comboBox_singular_cnv.setEnabled)
+        self.comboBox_singular_cnv.addItems(get_cnv_values(var.cnv_dir))
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         self.pushButton_multiple_output.setDefault(False)
 
 
@@ -1054,6 +1091,7 @@ class Ui_MainWindow(object):
         self.label_multiple_start.setText(QCoreApplication.translate("MainWindow", u"In\u00edcio da vig\u00eancia:", None))
         self.label_multiple_end.setText(QCoreApplication.translate("MainWindow", u"Final da vig\u00eancia:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_multiple), QCoreApplication.translate("MainWindow", u"M\u00faltiplos", None))
+        self.pushButton_singular_emit.setText(QCoreApplication.translate("MainWindow", u"Emitir", None))
         self.label_singular_name.setText(QCoreApplication.translate("MainWindow", u"Nome:", None))
         self.label_singular_cpf.setText(QCoreApplication.translate("MainWindow", u"CPF:", None))
         self.label_singular_matricula.setText(QCoreApplication.translate("MainWindow", u"Matr\u00edcula:", None))
@@ -1065,7 +1103,7 @@ class Ui_MainWindow(object):
         self.pushButton_singular_select_output.setText(QCoreApplication.translate("MainWindow", u"Selecionar diret\u00f3rio de destino", None))
         self.label_singular_output_header.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio selecionado:", None))
         self.label_singular_output_text.setText("")
-        self.pushButton_singular_emit.setText(QCoreApplication.translate("MainWindow", u"Emitir", None))
+        self.checkBox_singular_allow_cnv.setText(QCoreApplication.translate("MainWindow", u"Usar CNV", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_singular), QCoreApplication.translate("MainWindow", u"Individual", None))
         self.label_config_max_threads.setText(QCoreApplication.translate("MainWindow", u"Quantidade m\u00e1xima de threads:", None))
         self.label_config_max_thread_number.setText(QCoreApplication.translate("MainWindow", u"150", None))
@@ -1075,23 +1113,23 @@ class Ui_MainWindow(object):
         self.label_config_max_processes_number.setText(QCoreApplication.translate("MainWindow", u"4", None))
         self.pushButton_config_cobertura_source.setText(QCoreApplication.translate("MainWindow", u"Trocar arquivo de corberturas", None))
         self.label_config_selection_cobertura.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
-
+        self.label_config_cobertura_text.setText("")
         self.pushButton_config_cnv_source.setText(QCoreApplication.translate("MainWindow", u"Trocar arquivo de c\u00f3digos CNV", None))
         self.label_config_selection_cnv.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
-
+        self.label_config_cnv_text.setText("")
         self.pushButton_config_change_pdf_template.setText(QCoreApplication.translate("MainWindow", u"Trocar PDF modelo", None))
         self.label_config_selection_pdf.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
-
+        self.label_config_pdf_text.setText("")
         self.label_config_start_date.setText(QCoreApplication.translate("MainWindow", u"Data de vig\u00eancia inicial padr\u00e3o:", None))
         self.label_config_end_date.setText(QCoreApplication.translate("MainWindow", u"Data de vig\u00eancia final padr\u00e3o", None))
         self.pushButton_config_source.setText(QCoreApplication.translate("MainWindow", u"Trocar fonte de dados padr\u00e3o", None))
         self.label_config_selection_data_source.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
-
+        self.label_config_source_text.setText("")
         self.pushButton_config_output_dir.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio padr\u00e3o de salvamento", None))
         self.label_config_selection_output_dir.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
-
+        self.label_config_output_dir_text.setText("")
         self.label_config_text_left.setText(QCoreApplication.translate("MainWindow", u"Dist\u00e2ncia do texto \u00e0 esquerda:", None))
-        self.label_config_text__left_text.setText(QCoreApplication.translate("MainWindow", u"65", None))
+        self.label_config_text_left_text.setText(QCoreApplication.translate("MainWindow", u"65", None))
         self.label_config_text_right.setText(QCoreApplication.translate("MainWindow", u"Altura inicial do texto:", None))
         self.label_config_text_height_text.setText(QCoreApplication.translate("MainWindow", u"620", None))
         self.label_config_text_space.setText(QCoreApplication.translate("MainWindow", u"Espa\u00e7amento entre linhas:", None))
@@ -1114,6 +1152,7 @@ class Ui_MainWindow(object):
         self.label_config_dates_title.setText(QCoreApplication.translate("MainWindow", u"Datas de vig\u00eancia", None))
         self.label_config_file_option_titles.setText(QCoreApplication.translate("MainWindow", u"Op\u00e7\u00f5es de arquivos", None))
         self.label_config_performance_title.setText(QCoreApplication.translate("MainWindow", u"Performance - threading e multiprocessamento", None))
+        self.label_config_keywords_description.setText(QCoreApplication.translate("MainWindow", u"Estas s\u00e3o palavras-chaves que o programa procurar\u00e1 na primeira linha das planilhas numa tentativa de encontrar as colunas dos campos repectivos. Letras mai\u00fasculas e acentos ser\u00e3o desconsiderados. Separe cada palavra-chave com um ponto e v\u00edrgula ( ; ). Uma planilha n\u00e3o precisa ter simultaneamente uma coluna para cobertura e para CNV, apenas um \u00e9 necess\u00e1rio. Ademais, se o programa n\u00e3o encontrar todas as colunas necess\u00e1rias, ele lhe perguntar\u00e1 se deve prosseguir ou abortar.", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_config), QCoreApplication.translate("MainWindow", u"Configura\u00e7\u00f5es", None))
 
         # Coisas adicionadas manualmente. ------------------------------------------------------------------------------
@@ -1125,7 +1164,7 @@ class Ui_MainWindow(object):
         self.label_config_max_processes_number.setText(QCoreApplication.translate("MainWindow", f"{var.max_processes}", None))
         self.label_config_max_thread_number.setText(QCoreApplication.translate("MainWindow", f"{var.max_threads}", None))
 
-        self.label_config_text__left_text.setText(QCoreApplication.translate("MainWindow", f"{var.dist_left}", None))
+        self.label_config_text_left_text.setText(QCoreApplication.translate("MainWindow", f"{var.dist_left}", None))
         self.label_config_text_height_text.setText(QCoreApplication.translate("MainWindow", f"{var.text_height}", None))
         self.label_config_text_space_text.setText(QCoreApplication.translate("MainWindow", f"{var.line_space}", None))
         self.label_config_text_break_text.setText(QCoreApplication.translate("MainWindow", f"{var.max_chars}", None))
@@ -1237,7 +1276,7 @@ class Ui_MainWindow(object):
             warning.exec()
             var.abort_emission = True
 
-        if var.headers['name'] == '' and not var.abort_emission:
+        if var.headers['name'] == '' and not var.abort_emission and not any(var.name_keywords):
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1249,7 +1288,7 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['cpf'] == '' and not var.abort_emission:
+        if var.headers['cpf'] == '' and not var.abort_emission and not any(var.cpf_keywords):
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1261,7 +1300,7 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['cnpj'] == '' and not var.abort_emission:
+        if var.headers['cnpj'] == '' and not var.abort_emission and not any(var.cnpj_keywords):
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1273,7 +1312,7 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['clie'] == '' and not var.abort_emission:
+        if var.headers['clie'] == '' and not var.abort_emission and not any(var.cliente_keywords):
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1285,7 +1324,7 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['matr'] == '' and not var.abort_emission:
+        if var.headers['matr'] == '' and not var.abort_emission and not any(var.matricula_keywords):
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1297,7 +1336,7 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['cobe'] == '' and var.headers['cnv'] == '' and not var.abort_emission:
+        if var.headers['cobe'] == '' and not any(var.cobertura_keywords) and var.headers['cnv'] == '' and not any(var.cnv_keywords) and not var.abort_emission:
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1309,7 +1348,7 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['apol'] == '' and not var.abort_emission:
+        if var.headers['apol'] == '' and not var.abort_emission and not any(var.apolice_keywords):
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1336,16 +1375,26 @@ class Ui_MainWindow(object):
         self.label_console.setText(self.listWidget_singular_cobertura.selectedItems()[0].text())
 
     def emit_singular(self):
+        cnv_df = get_cnv(var.cnv_dir)
+
+        if self.comboBox_singular_cnv.isEnabled():
+            cnv = self.comboBox_singular_cnv.currentText()
+            cobe = False
+
+        else:
+            try:
+                cobe = self.listWidget_singular_cobertura.selectedItems()[0].text()
+            except (AttributeError, IndexError):
+                cobe = ''
+
+            cnv = False
+
         name = self.lineEdit_singular_name.text()
         cpf  = self.lineEdit_singular_cpf.text()
         cnpj = self.lineEdit_singular_cnpj.text()
         clie = self.lineEdit_singular_client.text()
         matr = self.lineEdit_singular_matricula.text()
         apol = self.lineEdit_singular_apolice.text()
-        try:
-            cobe = self.listWidget_singular_cobertura.selectedItems()[0].text()
-        except (AttributeError, IndexError):
-            cobe = ''
 
         if var.output_dir == '':
             warning = QMessageBox()
@@ -1460,7 +1509,11 @@ class Ui_MainWindow(object):
             warning.exec()
 
         else:
-            emit_singular(name, cpf, cnpj, matr, clie, apol, cobe, cnv='')
+            if cnv is False:
+                emit_singular(name, cpf, cnpj, matr, clie, apol, cobe, '')
+            else:
+                emit_singular(name, cpf, cnpj, matr, clie, apol, '', cnv_df.loc[cnv])
+
             self.label_console.setText(f'arquivo {cp(cpf)} - {nm(name)} emitido com êxito.')
 
     def change_coberturas_file(self):
@@ -1541,6 +1594,8 @@ class Ui_MainWindow(object):
             var.output_dir = dire.replace(var.work_directory, '')
             push('output_dir', var.output_dir)
 
+            self.label_multiple_output_text.setText(var.output_dir)
+            self.label_singular_output_text.setText(var.output_dir)
             self.label_config_output_dir_text.setText(var.output_dir)
             self.label_console.setText('Diretório de saída padrão atualizado.')
 
@@ -1598,7 +1653,7 @@ class Ui_MainWindow(object):
         self.label_console.setText('Data de vigência final padrão atualizada.')
 
     def change_left_spacing(self):
-        self.label_config_text__left_text.setNum(self.horizontalSlider_config_text_left.value())
+        self.label_config_text_left_text.setNum(self.horizontalSlider_config_text_left.value())
 
         var.dist_left = self.horizontalSlider_config_text_left.value()
         push('dist_left', var.dist_left)

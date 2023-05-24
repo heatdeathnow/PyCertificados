@@ -13,10 +13,6 @@ import neat
 import var
 
 
-template = PdfReader(var.template_dir, decompress=False)
-template_obj = pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
-
-
 # Método usado para emitir um certificado. Leva nome, CPF, CNPJ, matrícula, cliente, apólice e coberturas ou código.
 def emit_singular(name, cpf, cnpj, matr, clie, apol, cobe='', cnv=''):
     with var.lock:
@@ -102,6 +98,52 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     marginal_cert = 0
     j = 0
 
+    # Isso é necessário para evitar crashes quando o usuário decide continuar mesmo faltando campos.
+    # E para caso as palavras chaves estejam vazias.
+    arguments = []
+    if var.headers['name'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['name']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['cpf'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['cpf']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['cnpj'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['cnpj']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['matr'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['matr']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['clie'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['clie']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['apol'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['apol']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['cobe'] != '' and var.headers['cnv'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['cobe']])
+        arguments.append(lambda i: '')
+    elif var.headers['cobe'] != '' and var.headers['cnv'] == '':
+        arguments.append(lambda i: df.iloc[i, var.headers['cobe']])
+        arguments.append(lambda i: '')
+    elif var.headers['cobe'] == '' and var.headers['cnv'] != '':
+        arguments.append(lambda i: '')
+        arguments.append(lambda i: cnv.loc[neat.cnv(df.iloc[i, var.headers['cnv']])])
+    else:
+        arguments.append(lambda i: 'ERRO')
+        arguments.append(lambda i: 'ERRO')
+
     while j < var.max_progress:
         needed = var.target_threads - active_count()  # Três threads estão sempre ativas: (MainThread, update_progressbar_daemon, e emit_from_source) por isso a opção mínima é quatro.
         if j + needed > var.max_progress:
@@ -110,31 +152,8 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
         elif needed <= 0:
             needed = 1
 
-        if var.headers['cobe'] != '' and active_count() < var.max_threads:
-            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, var.headers['name']],
-                                                              df.iloc[i, var.headers['cpf' ]],
-                                                              df.iloc[i, var.headers['cnpj']],
-                                                              df.iloc[i, var.headers['matr']],
-                                                              df.iloc[i, var.headers['clie']],
-                                                              df.iloc[i, var.headers['apol']],
-                                                              df.iloc[i, var.headers['cobe']],
-                                                              ''
-                                                              )) for i in range(j, j + needed))
-
-            for i in range(1, needed + 1):
-                threads[-i].start()
-            j += needed
-
-        elif active_count() < var.max_threads:
-            threads.extend(Thread(target=emit_singular, args=(df.iloc[i, var.headers['name']],
-                                                              df.iloc[i, var.headers['cpf' ]],
-                                                              df.iloc[i, var.headers['cnpj']],
-                                                              df.iloc[i, var.headers['matr']],
-                                                              df.iloc[i, var.headers['clie']],
-                                                              df.iloc[i, var.headers['apol']],
-                                                              '',
-                                                              cnv.loc[neat.cnv(df.iloc[i, var.headers['cnv']])]
-                                                              )) for i in range(j, j + needed))
+        if active_count() < var.max_threads:
+            threads.extend(Thread(target=emit_singular, args=[arg(i) for arg in arguments]) for i in range(j, j + needed))
 
             for i in range(1, needed + 1):
                 threads[-i].start()
@@ -162,3 +181,7 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     var.progress = 0
     print(f'Tempo levado para salvar {var.max_progress} arquivos PDF da memória para o disco: {(time() - emit_time) / 60:.2f} minutos')
     print(f'Velocidade média: {var.certificates_per_second:.2f}')
+
+
+template = PdfReader(var.template_dir, decompress=False)
+template_obj = pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
