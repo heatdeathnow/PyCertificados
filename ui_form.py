@@ -287,26 +287,38 @@ class Ui_MainWindow(object):
         sizePolicy3.setHeightForWidth(self.label_singular_startdate.sizePolicy().hasHeightForWidth())
         self.label_singular_startdate.setSizePolicy(sizePolicy3)
 
-        self.formLayout_singular_write.setWidget(6, QFormLayout.LabelRole, self.label_singular_startdate)
+        self.formLayout_singular_write.setWidget(7, QFormLayout.LabelRole, self.label_singular_startdate)
 
         self.label_singular_enddate = QLabel(self.tab_singular)
         self.label_singular_enddate.setObjectName(u"label_singular_enddate")
         sizePolicy3.setHeightForWidth(self.label_singular_enddate.sizePolicy().hasHeightForWidth())
         self.label_singular_enddate.setSizePolicy(sizePolicy3)
 
-        self.formLayout_singular_write.setWidget(7, QFormLayout.LabelRole, self.label_singular_enddate)
+        self.formLayout_singular_write.setWidget(8, QFormLayout.LabelRole, self.label_singular_enddate)
 
         self.dateEdit_singular_start = QDateEdit(self.tab_singular)
         self.dateEdit_singular_start.setObjectName(u"dateEdit_singular_start")
         self.dateEdit_singular_start.setCalendarPopup(True)
 
-        self.formLayout_singular_write.setWidget(6, QFormLayout.FieldRole, self.dateEdit_singular_start)
+        self.formLayout_singular_write.setWidget(7, QFormLayout.FieldRole, self.dateEdit_singular_start)
 
         self.dateEdit_singular_end = QDateEdit(self.tab_singular)
         self.dateEdit_singular_end.setObjectName(u"dateEdit_singular_end")
         self.dateEdit_singular_end.setCalendarPopup(True)
 
-        self.formLayout_singular_write.setWidget(7, QFormLayout.FieldRole, self.dateEdit_singular_end)
+        self.formLayout_singular_write.setWidget(8, QFormLayout.FieldRole, self.dateEdit_singular_end)
+
+        self.label_singular_capital = QLabel(self.tab_singular)
+        self.label_singular_capital.setObjectName(u"label_singular_capital")
+        sizePolicy3.setHeightForWidth(self.label_singular_capital.sizePolicy().hasHeightForWidth())
+        self.label_singular_capital.setSizePolicy(sizePolicy3)
+
+        self.formLayout_singular_write.setWidget(6, QFormLayout.LabelRole, self.label_singular_capital)
+
+        self.lineEdit_singular_capital = QLineEdit(self.tab_singular)
+        self.lineEdit_singular_capital.setObjectName(u"lineEdit_singular_capital")
+
+        self.formLayout_singular_write.setWidget(6, QFormLayout.FieldRole, self.lineEdit_singular_capital)
 
 
         self.gridLayout_2.addLayout(self.formLayout_singular_write, 2, 1, 1, 1)
@@ -374,6 +386,12 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
         self.formLayout = QFormLayout(self.scrollAreaWidgetContents)
         self.formLayout.setObjectName(u"formLayout")
+        self.label_config_performance_title = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_performance_title.setObjectName(u"label_config_performance_title")
+        self.label_config_performance_title.setAlignment(Qt.AlignCenter)
+
+        self.formLayout.setWidget(0, QFormLayout.SpanningRole, self.label_config_performance_title)
+
         self.label_config_max_threads = QLabel(self.scrollAreaWidgetContents)
         self.label_config_max_threads.setObjectName(u"label_config_max_threads")
         sizePolicy3.setHeightForWidth(self.label_config_max_threads.sizePolicy().hasHeightForWidth())
@@ -472,6 +490,12 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(4, QFormLayout.SpanningRole, self.line)
 
+        self.label_config_file_option_titles = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_file_option_titles.setObjectName(u"label_config_file_option_titles")
+        self.label_config_file_option_titles.setAlignment(Qt.AlignCenter)
+
+        self.formLayout.setWidget(5, QFormLayout.SpanningRole, self.label_config_file_option_titles)
+
         self.pushButton_config_cobertura_source = QPushButton(self.scrollAreaWidgetContents)
         self.pushButton_config_cobertura_source.setObjectName(u"pushButton_config_cobertura_source")
         self.pushButton_config_cobertura_source.setMinimumSize(QSize(0, 30))
@@ -554,6 +578,12 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(9, QFormLayout.SpanningRole, self.line_2)
 
+        self.label_config_dates_title = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_dates_title.setObjectName(u"label_config_dates_title")
+        self.label_config_dates_title.setAlignment(Qt.AlignCenter)
+
+        self.formLayout.setWidget(10, QFormLayout.SpanningRole, self.label_config_dates_title)
+
         self.label_config_start_date = QLabel(self.scrollAreaWidgetContents)
         self.label_config_start_date.setObjectName(u"label_config_start_date")
         sizePolicy3.setHeightForWidth(self.label_config_start_date.sizePolicy().hasHeightForWidth())
@@ -592,6 +622,12 @@ class Ui_MainWindow(object):
         self.line_3.setFrameShadow(QFrame.Sunken)
 
         self.formLayout.setWidget(13, QFormLayout.SpanningRole, self.line_3)
+
+        self.label_config_data_input_and_output_title = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_data_input_and_output_title.setObjectName(u"label_config_data_input_and_output_title")
+        self.label_config_data_input_and_output_title.setAlignment(Qt.AlignCenter)
+
+        self.formLayout.setWidget(14, QFormLayout.SpanningRole, self.label_config_data_input_and_output_title)
 
         self.pushButton_config_source = QPushButton(self.scrollAreaWidgetContents)
         self.pushButton_config_source.setObjectName(u"pushButton_config_source")
@@ -649,6 +685,12 @@ class Ui_MainWindow(object):
         self.line_4.setFrameShadow(QFrame.Sunken)
 
         self.formLayout.setWidget(17, QFormLayout.SpanningRole, self.line_4)
+
+        self.label_config_formatting_title = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_formatting_title.setObjectName(u"label_config_formatting_title")
+        self.label_config_formatting_title.setAlignment(Qt.AlignCenter)
+
+        self.formLayout.setWidget(18, QFormLayout.SpanningRole, self.label_config_formatting_title)
 
         self.label_config_text_left = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_left.setObjectName(u"label_config_text_left")
@@ -933,7 +975,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cobertura.addWidget(self.lineEdit_config_cobertura)
 
 
-        self.formLayout.setLayout(36, QFormLayout.SpanningRole, self.horizontalLayout_config_cobertura)
+        self.formLayout.setLayout(37, QFormLayout.SpanningRole, self.horizontalLayout_config_cobertura)
 
         self.horizontalLayout_config_cnv = QHBoxLayout()
         self.horizontalLayout_config_cnv.setObjectName(u"horizontalLayout_config_cnv")
@@ -954,43 +996,31 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cnv.addWidget(self.lineEdit_config_cnv)
 
 
-        self.formLayout.setLayout(37, QFormLayout.SpanningRole, self.horizontalLayout_config_cnv)
-
-        self.label_config_formatting_title = QLabel(self.scrollAreaWidgetContents)
-        self.label_config_formatting_title.setObjectName(u"label_config_formatting_title")
-        self.label_config_formatting_title.setAlignment(Qt.AlignCenter)
-
-        self.formLayout.setWidget(18, QFormLayout.SpanningRole, self.label_config_formatting_title)
-
-        self.label_config_data_input_and_output_title = QLabel(self.scrollAreaWidgetContents)
-        self.label_config_data_input_and_output_title.setObjectName(u"label_config_data_input_and_output_title")
-        self.label_config_data_input_and_output_title.setAlignment(Qt.AlignCenter)
-
-        self.formLayout.setWidget(14, QFormLayout.SpanningRole, self.label_config_data_input_and_output_title)
-
-        self.label_config_dates_title = QLabel(self.scrollAreaWidgetContents)
-        self.label_config_dates_title.setObjectName(u"label_config_dates_title")
-        self.label_config_dates_title.setAlignment(Qt.AlignCenter)
-
-        self.formLayout.setWidget(10, QFormLayout.SpanningRole, self.label_config_dates_title)
-
-        self.label_config_file_option_titles = QLabel(self.scrollAreaWidgetContents)
-        self.label_config_file_option_titles.setObjectName(u"label_config_file_option_titles")
-        self.label_config_file_option_titles.setAlignment(Qt.AlignCenter)
-
-        self.formLayout.setWidget(5, QFormLayout.SpanningRole, self.label_config_file_option_titles)
-
-        self.label_config_performance_title = QLabel(self.scrollAreaWidgetContents)
-        self.label_config_performance_title.setObjectName(u"label_config_performance_title")
-        self.label_config_performance_title.setAlignment(Qt.AlignCenter)
-
-        self.formLayout.setWidget(0, QFormLayout.SpanningRole, self.label_config_performance_title)
+        self.formLayout.setLayout(38, QFormLayout.SpanningRole, self.horizontalLayout_config_cnv)
 
         self.label_config_keywords_description = QLabel(self.scrollAreaWidgetContents)
         self.label_config_keywords_description.setObjectName(u"label_config_keywords_description")
         self.label_config_keywords_description.setWordWrap(True)
 
-        self.formLayout.setWidget(38, QFormLayout.SpanningRole, self.label_config_keywords_description)
+        self.formLayout.setWidget(39, QFormLayout.SpanningRole, self.label_config_keywords_description)
+
+        self.horizontalLayout_config_capital = QHBoxLayout()
+        self.horizontalLayout_config_capital.setObjectName(u"horizontalLayout_config_capital")
+        self.label_config_capital = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_capital.setObjectName(u"label_config_capital")
+        sizePolicy3.setHeightForWidth(self.label_config_capital.sizePolicy().hasHeightForWidth())
+        self.label_config_capital.setSizePolicy(sizePolicy3)
+        self.label_config_capital.setMinimumSize(QSize(60, 0))
+
+        self.horizontalLayout_config_capital.addWidget(self.label_config_capital)
+
+        self.lineEdit_config_capital = QLineEdit(self.scrollAreaWidgetContents)
+        self.lineEdit_config_capital.setObjectName(u"lineEdit_config_capital")
+
+        self.horizontalLayout_config_capital.addWidget(self.lineEdit_config_capital)
+
+
+        self.formLayout.setLayout(36, QFormLayout.SpanningRole, self.horizontalLayout_config_capital)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -1029,6 +1059,7 @@ class Ui_MainWindow(object):
         self.lineEdit_config_matricula.setText(';'.join(var.matricula_keywords))
         self.lineEdit_config_cliente.setText(';'.join(var.cliente_keywords))
         self.lineEdit_config_apolice.setText(';'.join(var.apolice_keywords))
+        self.lineEdit_config_capital.setText(';'.join(var.capital_keywords))
         self.lineEdit_config_cobertura.setText(';'.join(var.cobertura_keywords))
         self.lineEdit_config_cnv.setText(';'.join(var.cnv_keywords))
         # Fim das coisas adicionadas manualmente. Essas linhas devem estar ACIMA dos connects com os slots. ------------
@@ -1065,12 +1096,12 @@ class Ui_MainWindow(object):
         self.lineEdit_config_cliente.textEdited.connect(self.change_cliente_keywords)
         self.lineEdit_config_apolice.textEdited.connect(self.change_apolice_keywords)
         self.lineEdit_config_cobertura.textEdited.connect(self.change_cobertura_keywords)
-        self.lineEdit_config_cnv.textEdited.connect(self.change_cnv_keywords)
         self.checkBox_singular_allow_cnv.toggled.connect(self.listWidget_singular_cobertura.setDisabled)
         self.checkBox_singular_allow_cnv.toggled.connect(self.comboBox_singular_cnv.setEnabled)
-        self.comboBox_singular_cnv.addItems(get_cnv_values(var.cnv_dir))
+        self.lineEdit_config_cnv.textEdited.connect(self.change_cnv_keywords)
+        self.lineEdit_config_capital.textEdited.connect(self.change_capital_keywords)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
         self.pushButton_multiple_output.setDefault(False)
 
 
@@ -1100,17 +1131,20 @@ class Ui_MainWindow(object):
         self.label_singular_client.setText(QCoreApplication.translate("MainWindow", u"Cliente:", None))
         self.label_singular_startdate.setText(QCoreApplication.translate("MainWindow", u"In\u00edcio de vig\u00eancia:", None))
         self.label_singular_enddate.setText(QCoreApplication.translate("MainWindow", u"Fim de vig\u00eancia:", None))
+        self.label_singular_capital.setText(QCoreApplication.translate("MainWindow", u"Capital:", None))
         self.pushButton_singular_select_output.setText(QCoreApplication.translate("MainWindow", u"Selecionar diret\u00f3rio de destino", None))
         self.label_singular_output_header.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio selecionado:", None))
         self.label_singular_output_text.setText("")
         self.checkBox_singular_allow_cnv.setText(QCoreApplication.translate("MainWindow", u"Usar CNV", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_singular), QCoreApplication.translate("MainWindow", u"Individual", None))
+        self.label_config_performance_title.setText(QCoreApplication.translate("MainWindow", u"Performance - threading e multiprocessamento", None))
         self.label_config_max_threads.setText(QCoreApplication.translate("MainWindow", u"Quantidade m\u00e1xima de threads:", None))
         self.label_config_max_thread_number.setText(QCoreApplication.translate("MainWindow", u"150", None))
         self.label_config_target_threads.setText(QCoreApplication.translate("MainWindow", u"Quantidade alvo de threads:", None))
         self.label_config_target_thread_number.setText(QCoreApplication.translate("MainWindow", u"15", None))
         self.label_config_max_processes.setText(QCoreApplication.translate("MainWindow", u"Quantiade m\u00e1xima de processos:", None))
         self.label_config_max_processes_number.setText(QCoreApplication.translate("MainWindow", u"4", None))
+        self.label_config_file_option_titles.setText(QCoreApplication.translate("MainWindow", u"Op\u00e7\u00f5es de arquivos", None))
         self.pushButton_config_cobertura_source.setText(QCoreApplication.translate("MainWindow", u"Trocar arquivo de corberturas", None))
         self.label_config_selection_cobertura.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
         self.label_config_cobertura_text.setText("")
@@ -1120,14 +1154,17 @@ class Ui_MainWindow(object):
         self.pushButton_config_change_pdf_template.setText(QCoreApplication.translate("MainWindow", u"Trocar PDF modelo", None))
         self.label_config_selection_pdf.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
         self.label_config_pdf_text.setText("")
+        self.label_config_dates_title.setText(QCoreApplication.translate("MainWindow", u"Datas de vig\u00eancia", None))
         self.label_config_start_date.setText(QCoreApplication.translate("MainWindow", u"Data de vig\u00eancia inicial padr\u00e3o:", None))
         self.label_config_end_date.setText(QCoreApplication.translate("MainWindow", u"Data de vig\u00eancia final padr\u00e3o", None))
+        self.label_config_data_input_and_output_title.setText(QCoreApplication.translate("MainWindow", u"Entrada e sa\u00edda de dados", None))
         self.pushButton_config_source.setText(QCoreApplication.translate("MainWindow", u"Trocar fonte de dados padr\u00e3o", None))
         self.label_config_selection_data_source.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
         self.label_config_source_text.setText("")
         self.pushButton_config_output_dir.setText(QCoreApplication.translate("MainWindow", u"Diret\u00f3rio padr\u00e3o de salvamento", None))
         self.label_config_selection_output_dir.setText(QCoreApplication.translate("MainWindow", u"Sele\u00e7\u00e3o:", None))
         self.label_config_output_dir_text.setText("")
+        self.label_config_formatting_title.setText(QCoreApplication.translate("MainWindow", u"Formata\u00e7\u00e3o de texto", None))
         self.label_config_text_left.setText(QCoreApplication.translate("MainWindow", u"Dist\u00e2ncia do texto \u00e0 esquerda:", None))
         self.label_config_text_left_text.setText(QCoreApplication.translate("MainWindow", u"65", None))
         self.label_config_text_right.setText(QCoreApplication.translate("MainWindow", u"Altura inicial do texto:", None))
@@ -1147,12 +1184,8 @@ class Ui_MainWindow(object):
         self.label_config_apolice.setText(QCoreApplication.translate("MainWindow", u"Ap\u00f3lice:", None))
         self.label_config_cobertura.setText(QCoreApplication.translate("MainWindow", u"Cobertura:", None))
         self.label_config_cnv.setText(QCoreApplication.translate("MainWindow", u"CNV:", None))
-        self.label_config_formatting_title.setText(QCoreApplication.translate("MainWindow", u"Formata\u00e7\u00e3o de texto", None))
-        self.label_config_data_input_and_output_title.setText(QCoreApplication.translate("MainWindow", u"Entrada e sa\u00edda de dados", None))
-        self.label_config_dates_title.setText(QCoreApplication.translate("MainWindow", u"Datas de vig\u00eancia", None))
-        self.label_config_file_option_titles.setText(QCoreApplication.translate("MainWindow", u"Op\u00e7\u00f5es de arquivos", None))
-        self.label_config_performance_title.setText(QCoreApplication.translate("MainWindow", u"Performance - threading e multiprocessamento", None))
         self.label_config_keywords_description.setText(QCoreApplication.translate("MainWindow", u"Estas s\u00e3o palavras-chaves que o programa procurar\u00e1 na primeira linha das planilhas numa tentativa de encontrar as colunas dos campos repectivos. Letras mai\u00fasculas e acentos ser\u00e3o desconsiderados. Separe cada palavra-chave com um ponto e v\u00edrgula ( ; ). Uma planilha n\u00e3o precisa ter simultaneamente uma coluna para cobertura e para CNV, apenas um \u00e9 necess\u00e1rio. Ademais, se o programa n\u00e3o encontrar todas as colunas necess\u00e1rias, ele lhe perguntar\u00e1 se deve prosseguir ou abortar.", None))
+        self.label_config_capital.setText(QCoreApplication.translate("MainWindow", u"Capital:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_config), QCoreApplication.translate("MainWindow", u"Configura\u00e7\u00f5es", None))
 
         # Coisas adicionadas manualmente. ------------------------------------------------------------------------------
@@ -1160,9 +1193,12 @@ class Ui_MainWindow(object):
         self.label_multiple_output_text.setText(var.output_dir)
         self.label_singular_output_text.setText(var.output_dir)
 
-        self.label_config_target_thread_number.setText(QCoreApplication.translate("MainWindow", f"{var.target_threads}", None))
-        self.label_config_max_processes_number.setText(QCoreApplication.translate("MainWindow", f"{var.max_processes}", None))
-        self.label_config_max_thread_number.setText(QCoreApplication.translate("MainWindow", f"{var.max_threads}", None))
+        self.label_config_target_thread_number.setText(
+            QCoreApplication.translate("MainWindow", f"{var.target_threads}", None))
+        self.label_config_max_processes_number.setText(
+            QCoreApplication.translate("MainWindow", f"{var.max_processes}", None))
+        self.label_config_max_thread_number.setText(
+            QCoreApplication.translate("MainWindow", f"{var.max_threads}", None))
 
         self.label_config_text_left_text.setText(QCoreApplication.translate("MainWindow", f"{var.dist_left}", None))
         self.label_config_text_height_text.setText(QCoreApplication.translate("MainWindow", f"{var.text_height}", None))
@@ -1179,7 +1215,8 @@ class Ui_MainWindow(object):
     def select_input_directory(self):
         file = QFileDialog.getOpenFileName()[0]
 
-        if file[-4:].lower() in ('xlsx', '.xls', '.csv', 'xlsm'):  # Serve para encurtar o diretório e para não trocar o diretório quando nada é selecionado.
+        if file[-4:].lower() in ('xlsx', '.xls', '.csv',
+                                 'xlsm'):  # Serve para encurtar o diretório e para não trocar o diretório quando nada é selecionado.
             var.data_dir = file.replace(var.work_directory, '')
             self.label_multiple_input_text.setText(var.data_dir)
 
@@ -1214,7 +1251,8 @@ class Ui_MainWindow(object):
             self.dateEdit_multiple_end.setDate(self.dateEdit_multiple_start.date())
             self.change_end_date_multiple()
 
-        self.label_console.setText(f'Data de vigência inicial atualizada para {var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}.')
+        self.label_console.setText(
+            f'Data de vigência inicial atualizada para {var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}.')
 
     def change_end_date_multiple(self):
         var.end_period = self.dateEdit_multiple_end.date().toPython()
@@ -1224,7 +1262,8 @@ class Ui_MainWindow(object):
             self.dateEdit_multiple_start.setDate(self.dateEdit_multiple_end.date())
             self.change_start_date_multiple()
 
-        self.label_console.setText(f'Data de vigência final atualizada para {var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}.')
+        self.label_console.setText(
+            f'Data de vigência final atualizada para {var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}.')
 
     def change_start_date_singular(self):
         var.start_period = self.dateEdit_singular_start.date().toPython()
@@ -1234,7 +1273,8 @@ class Ui_MainWindow(object):
             self.dateEdit_singular_end.setDate(self.dateEdit_singular_start.date())
             self.change_end_date_singular()
 
-        self.label_console.setText(f'Data de vigência inicial atualizada para {var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}.')
+        self.label_console.setText(
+            f'Data de vigência inicial atualizada para {var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}.')
 
     def change_end_date_singular(self):
         var.end_period = self.dateEdit_singular_end.date().toPython()
@@ -1244,7 +1284,8 @@ class Ui_MainWindow(object):
             self.dateEdit_singular_start.setDate(self.dateEdit_singular_end.date())
             self.change_start_date_singular()
 
-        self.label_console.setText(f'Data de vigência final atualizada para {var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}.')
+        self.label_console.setText(
+            f'Data de vigência final atualizada para {var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}.')
 
     def update_progress_bar(self):
         sleep(0.001)
@@ -1256,7 +1297,8 @@ class Ui_MainWindow(object):
                 self.progressBar_multiple.setValue(100)
             sleep(0.001)
 
-        self.label_console.setText(f'Tempo para emitir {var.max_progress} certificados: {var.emission_time / 60:.2f} minutos | Velocidade: {var.certificates_per_second:.2f} certificados por segundo')
+        self.label_console.setText(
+            f'Tempo para emitir {var.max_progress} certificados: {var.emission_time / 60:.2f} minutos | Velocidade: {var.certificates_per_second:.2f} certificados por segundo')
         var.max_progress = 1
         var.certificates_per_second = 0
         var.emission_time = 0
@@ -1336,7 +1378,8 @@ class Ui_MainWindow(object):
             if warning.exec() == QMessageBox.StandardButton.Abort:
                 var.abort_emission = True
 
-        if var.headers['cobe'] == '' and not any(var.cobertura_keywords) and var.headers['cnv'] == '' and not any(var.cnv_keywords) and not var.abort_emission:
+        if var.headers['cobe'] == '' and not any(var.cobertura_keywords) and var.headers['cnv'] == '' and not any(
+                var.cnv_keywords) and not var.abort_emission:
             warning = QMessageBox()
             warning.setWindowTitle('AVISO')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1390,7 +1433,7 @@ class Ui_MainWindow(object):
             cnv = False
 
         name = self.lineEdit_singular_name.text()
-        cpf  = self.lineEdit_singular_cpf.text()
+        cpf = self.lineEdit_singular_cpf.text()
         cnpj = self.lineEdit_singular_cnpj.text()
         clie = self.lineEdit_singular_client.text()
         matr = self.lineEdit_singular_matricula.text()
@@ -1558,6 +1601,7 @@ class Ui_MainWindow(object):
         if file[-4:].lower() == '.pdf':
             var.template_dir = file.replace(var.work_directory, '')
             push('template_dir', var.template_dir)
+            var.template_obj = var.get_pdf_template()
 
             self.label_config_pdf_text.setText(var.template_dir)
             self.label_console.setText('Arquivo modelo PDF trocado.')
@@ -1607,9 +1651,21 @@ class Ui_MainWindow(object):
             warning.exec()
 
     def change_max_threads(self):
-        self.label_config_max_thread_number.setNum(self.horizontalSlider_config_max_threads.value())
-        var.max_threads = self.horizontalSlider_config_max_threads.value()
-        push('max_threads', var.max_threads)
+        if self.horizontalSlider_config_max_threads.value() < self.horizontalSlider_config_target_threads.value():
+            self.label_config_max_thread_number.setNum(self.horizontalSlider_config_max_threads.value())
+            self.label_config_target_thread_number.setNum(self.horizontalSlider_config_max_threads.value())
+            self.horizontalSlider_config_target_threads.setValue(self.horizontalSlider_config_max_threads.value())
+
+            var.max_threads = self.horizontalSlider_config_max_threads.value()
+            var.target_threads = var.max_threads
+            push('max_threads', var.max_threads)
+            push('target_threads', var.target_threads)
+
+        else:
+            self.label_config_max_thread_number.setNum(self.horizontalSlider_config_max_threads.value())
+
+            var.max_threads = self.horizontalSlider_config_max_threads.value()
+            push('max_threads', var.max_threads)
 
         self.label_console.setText('Número máximo de threads permitidas atualizado.')
 
@@ -1759,6 +1815,16 @@ class Ui_MainWindow(object):
         push('cobertura_keywords', keywords)
 
         self.label_console.setText('Palavras-chave para coberturas atualizadas.')
+
+    def change_capital_keywords(self):
+        keywords = []
+        for i in self.lineEdit_config_capital.text().split(';'):
+            keywords.append(unidecode(i.strip().lower()))
+
+        var.capital_keywords = keywords
+        push('capital_keywords', keywords)
+
+        self.label_console.setText('Palavras-chave para capital atualizadas.')
 
     def change_cnv_keywords(self):
         keywords = []

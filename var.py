@@ -1,5 +1,8 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QApplication
 from multiprocessing import cpu_count
+from pdfrw.buildxobj import pagexobj
+from locale import setlocale, LC_ALL
+from pdfrw import PdfReader
 from yaml import safe_load
 from os.path import exists
 from datetime import date
@@ -47,6 +50,13 @@ def critical_select_pdf():
             exit()
 
 
+def get_pdf_template():  # Abre o modelo PDF. (Isso tem que ser feito aqui para poder mudá-lo posteriormente nas configurações)
+    template = PdfReader(template_dir, decompress=False)
+    return pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
+
+
+setlocale(LC_ALL, 'pt-BR.UTF-8')  # Localização é usado para formatar dinheiro quando há campo capital
+
 app = QApplication(argv)  # É necessário que o QApplication seja inicializado antes das possíveis janelas de erro e QDialogs que o podem vir a usá-lo.
 
 progress                = 0
@@ -54,7 +64,7 @@ max_progress            = 1
 certificates_per_second = 0
 emission_time           = 0
 work_directory          = getcwd().replace('\\', '/') + '/'  # Diretório onde está sendo executado o programa para que ele possa salvar outros diretórios de maneira mais legível.
-load_problem            = False  # Quando há algum problema de carregamento, o programa salva imediatamente depois de concluir um carregamento correto.
+load_problem            = False  # Quando há algum problema de carregamento, o programa salva imediatamente após concluir um carregamento correto.
 abort_emission          = False  # Usado para dar a opção de abortar a emissão quando a planilha está faltando colunas críticas.
 headers = ''
 
@@ -243,6 +253,13 @@ except (KeyError, TypeError):
     load_problem = True
 
 try:
+    capital_keywords = dic['capital_keywords']
+except (KeyError, TypeError):
+    print('Erro ao carregar palavras-chave para capital, assumindo valor padrão de "CAPITAL".')
+    capital_keywords = ['CAPITAL']
+    load_problem = True
+
+try:
     cobertura_keywords = dic['cobertura_keywords']
 except (KeyError, TypeError):
     print('Erro ao carregar palavras-chave para cobertura, assumindo valor padrão de "COBERTURA".')
@@ -255,3 +272,5 @@ except (KeyError, TypeError):
     print('Erro ao carregar palavras-chave para CNV, assumindo valor padrão de "CNV".')
     cnv_keywords = ['CNV']
     load_problem = True
+
+template_obj = get_pdf_template()

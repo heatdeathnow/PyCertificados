@@ -1,10 +1,8 @@
 from threading import active_count, Thread
 from reportlab.pdfgen.canvas import Canvas
-from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
 from openpyxl import load_workbook
 from time import sleep, time
-from pdfrw import PdfReader
 from textwrap import wrap
 from pandas import concat
 from math import floor
@@ -14,7 +12,7 @@ import var
 
 
 # Método usado para emitir um certificado. Leva nome, CPF, CNPJ, matrícula, cliente, apólice e coberturas ou código.
-def emit_singular(name, cpf, cnpj, matr, clie, apol, cobe='', cnv=''):
+def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
     with var.lock:
         var.progress += 1
         text = var.base_text  # Copia o texto base para uma variável nesse processo.
@@ -28,6 +26,7 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, cobe='', cnv=''):
     text = text.replace('<APOLICE>', str(apol))
     text = text.replace('<COMECO>', f'{var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}')
     text = text.replace('<FINAL>', f'{var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}')
+    text = text.replace('<CAPITAL>', neat.capi(capi))
 
     if cobe != '':
         text = text.replace('<COBERTURA>', cobe)
@@ -37,10 +36,15 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, cobe='', cnv=''):
 
     canvas = Canvas(f'{var.output_dir}{neat.cpf(cpf)} - {neat.name(name)}.pdf')  # Objeto do texto a ser salvo.
 
-    xobj_name = makerl(canvas, template_obj)  # Superposição objeto modelo com o objeto escritor por cima.
+    xobj_name = makerl(canvas, var.template_obj)  # Superposição objeto modelo com o objeto escritor por cima.
     canvas.doForm(xobj_name)
 
-    lines = wrap(text, var.max_chars)  # Quebra o texto contínuo em linha com no máximo segundo parâmetro de caracteres.
+    userbreaks = text.split('\n')
+    lines = []
+    for line in userbreaks:
+        broken_lines = wrap(line, var.max_chars)
+        for new_line in broken_lines:
+            lines.append(new_line)
 
     y = var.text_height
     for line in lines:
@@ -73,7 +77,7 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
             if i == range(var.max_processes)[-1]:  # Se estiver na última iteração, dê a sobra de linhas para o último processo.
                 processes.append(SubLoader(var.data_dir, (i * quotient) + 1, quotient + remainder, i, var.shared_list, var.lock))
 
-            elif i == 0:  # Primeira linha. Em todos os casos deve-se adicionar mais 1, pois senão há overlapping
+            elif i == 0:  # Primeira linha. Em todos os casos, deve-se adicionar mais 1, pois senão há overlapping
                 processes.append(SubLoader(var.data_dir, 1, quotient, i, var.shared_list, var.lock))
 
             else:  # Senão, dê apenas o quociente da divisão para esses processos que não são o último.
@@ -82,10 +86,10 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
             processes[i].start()
 
         for i in range(var.max_processes):
-            processes[i].join()  # Espera todos os processos carregarem suas seções de dados na memória para então continuar o programa.
+            processes[i].join()  # Espera todos os processos carregarem as suas seções de dados na memória para então continuar o programa.
 
         df = concat(var.shared_list[:], ignore_index=True)  # Junta todas as partes num inteiro.
-        var.shared_list = var.manager.list(range(var.max_processes))  # Deleta os fragmentos de dados depois de serem utilizados.
+        var.shared_list = var.manager.list(range(var.max_processes))  # Deleta os fragmentos de dados após serem utilizados.
 
     else:
         df = load(var.data_dir, header=None, skiprows=1)
@@ -99,7 +103,7 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     j = 0
 
     # Isso é necessário para evitar crashes quando o usuário decide continuar mesmo faltando campos.
-    # E para caso as palavras chaves estejam vazias.
+    # E para caso as palavras-chave estejam vazias.
     arguments = []
     if var.headers['name'] != '':
         arguments.append(lambda i: df.iloc[i, var.headers['name']])
@@ -128,6 +132,11 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
 
     if var.headers['apol'] != '':
         arguments.append(lambda i: df.iloc[i, var.headers['apol']])
+    else:
+        arguments.append(lambda i: 'ERRO')
+
+    if var.headers['capi'] != '':
+        arguments.append(lambda i: df.iloc[i, var.headers['capi']])
     else:
         arguments.append(lambda i: 'ERRO')
 
@@ -182,6 +191,3 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     print(f'Tempo levado para salvar {var.max_progress} arquivos PDF da memória para o disco: {(time() - emit_time) / 60:.2f} minutos')
     print(f'Velocidade média: {var.certificates_per_second:.2f}')
 
-
-template = PdfReader(var.template_dir, decompress=False)
-template_obj = pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.

@@ -1,10 +1,28 @@
 from numpy import trunc, float64, int64
 from unidecode import unidecode
 from pandas import isna
+from locale import currency
 
 
 def name(x):
     return unidecode(str(x).upper())  # Remove acentos e transforma o texto em CAIXA ALTA.
+
+
+def capi(x):
+    if isna(x) or x == 'ERRO':
+        x = 0.0
+
+    # Isso só faz sentido assumindo que a localidade do arquivo Excel cujos dados foram extraídos está em pt-BR
+    # Isso causará erros se isso não for verdadeiro.
+    # todo Fazer isso de uma maneira mais independente
+    elif type(x) == str:
+        x = x.replace('.', '').replace('R', '').replace('$', '').strip()
+        x = float(x.replace(',', '.'))
+
+    elif type(x) in (float64, int64):
+        x = float(x)
+
+    return currency(x, grouping=True)
 
 
 def cpf(x):
@@ -14,7 +32,7 @@ def cpf(x):
     elif type(x) in (float64, int64, int):
         x = str(int(trunc(x)))
 
-    x = x.replace('.', '').replace('-', '').replace('/', '')
+    x = x.replace('.', '').replace('-', '').replace('/', '').strip()
 
     # Se tiver faltando números no CPF, adiciona zeros no começo.
     if len(x) < 11:
@@ -34,7 +52,7 @@ def cnpj(x):
     elif type(x) in (float64, int64, int):
         x = str(int(trunc(x)))
 
-    x = x.replace('.', '').replace('-', '').replace('/', '')
+    x = x.replace('.', '').replace('-', '').replace('/', '').strip()
 
     # Se tiver faltando números no CNPJ, adiciona zeros no começo.
     if len(x) < 14:
@@ -59,9 +77,6 @@ def matr(x):
 
     if len(x) < 6:
         x = '0' * (6 - len(x)) + x  # Matrícula deve ter 6 caracteres.
-
-    elif len(x) > 6:
-        raise Exception(f'Matrícula "{x}" tem caracteres demais')
 
     return x
 

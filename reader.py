@@ -6,7 +6,7 @@ from time import time
 import var
 
 
-# Função load usada exclusivamente para multiprocessamento. Em vez de retornar o valor, ele o salva numa variável multiprocessamento no módulo var.
+# Função load usada exclusivamente para multiprocessamento. Em vez de retornar o valor, ele salva-o numa variável multiprocessamento no módulo var.
 class SubLoader(Process):
     def __init__(self, path, skiprows, nrows, i, mlist, lock):
         super().__init__()
@@ -30,7 +30,7 @@ class SubLoader(Process):
         print(f'Tempo levado para o {self.i + 1}º processo carregar {len(self.list[self.i].index)} linhas na memória: {(time() - self.loadtime):.2f} segundos.')
 
 
-# Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
+# Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com o seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
 def load(path, **kwargs):
     if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
         return read_excel(path, **kwargs)
@@ -74,7 +74,7 @@ def get_coberturas(path):
     return cobe
 
 
-# Função que olha todos os cabeçários da planilha e compara seus nomes com palavras-chaves. Usado para descobrir onde estão os dados que serão usados numa planilha desconhecida.
+# Função que olha todos os cabeçários da planilha e compara os seus nomes com palavras-chave. Usado para descobrir onde estão os dados que serão usados numa planilha desconhecida.
 def get_headers(path):
     df = load(path, nrows=1)
 
@@ -84,6 +84,7 @@ def get_headers(path):
                'matr': '',
                'clie': '',
                'apol': '',
+               'capi': '',
                'cobe': '',
                'cnv' : ''}
 
@@ -94,6 +95,7 @@ def get_headers(path):
     matr_found = False
     clie_found = False
     apol_found = False
+    capi_found = False
     cobe_found = False
     cnv_found  = False
 
@@ -123,6 +125,10 @@ def get_headers(path):
             headers['cobe'] = df.columns.get_loc(column)
             cobe_found = True
 
+        elif any(key in unidecode(column.lower().strip()) for key in var.capital_keywords) and not capi_found:
+            headers['capi'] = df.columns.get_loc(column)
+            capi_found = True
+
         elif any(key in unidecode(column.lower().strip()) for key in var.cnv_keywords) and not cnv_found:
             headers['cnv'] = df.columns.get_loc(column)
             cnv_found = True
@@ -134,7 +140,7 @@ def get_headers(path):
     return headers  # Retorna um dicionário contendo os índices das colunas que contém os dados que serão usados.
 
 
-def emergency_save():
+def emergency_save():  # Essa função salva todos os valores atuais
     with open('dados/init.yaml', 'w') as file:
         safe_dump({
             'max_threads'        :        var.max_threads,
@@ -158,12 +164,13 @@ def emergency_save():
             'matricula_keywords' : var.matricula_keywords,
             'cliente_keywords'   :   var.cliente_keywords,
             'apolice_keywords'   :   var.apolice_keywords,
+            'capital_keywords'   :   var.capital_keywords,
             'cobertura_keywords' : var.cobertura_keywords,
             'cnv_keywords'       :       var.cnv_keywords,
         }, file)
 
 
-def push(name, value):
+def push(name, value):  # Essa função salva um valor específico.
     with open('dados/init.yaml', 'r') as file:
         dic = safe_load(file.read())
 
