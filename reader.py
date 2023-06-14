@@ -153,6 +153,8 @@ def emergency_save():  # Essa função salva todos os valores atuais
             'cobertura_dir'      :      var.cobertura_dir,
             'cnv_dir'            :            var.cnv_dir,
             'template_dir'       :       var.template_dir,
+            'text_font'          :          var.text_font,
+            'text_size'          :          var.text_size,
             'dist_left'          :          var.dist_left,
             'text_height'        :        var.text_height,
             'line_space'         :         var.line_space,

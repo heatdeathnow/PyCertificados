@@ -1,3 +1,5 @@
+from reportlab.pdfbase.pdfmetrics import registerFont
+from reportlab.pdfbase.ttfonts import TTFont
 from threading import active_count, Thread
 from reportlab.pdfgen.canvas import Canvas
 from pdfrw.toreportlab import makerl
@@ -14,6 +16,10 @@ import var
 # Método usado para emitir um certificado. Leva nome, CPF, CNPJ, matrícula, cliente, apólice e coberturas ou código.
 def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
     with var.lock:
+        if var.progress == 0:
+            # Configura a fonte a ser usada no PDF
+            registerFont(TTFont(var.text_font, f'dados\\fontes\\{var.text_font}'))  # Registra essa fonte na memória
+
         var.progress += 1
         text = var.base_text  # Copia o texto base para uma variável nesse processo.
 
@@ -35,6 +41,7 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
         text = text.replace('<COBERTURA>', cnv)
 
     canvas = Canvas(f'{var.output_dir}{neat.cpf(cpf)} - {neat.name(name)}.pdf')  # Objeto do texto a ser salvo.
+    canvas.setFont(var.text_font, var.text_size)  # Seleciona esse fonte para ser usada
 
     xobj_name = makerl(canvas, var.template_obj)  # Superposição objeto modelo com o objeto escritor por cima.
     canvas.doForm(xobj_name)

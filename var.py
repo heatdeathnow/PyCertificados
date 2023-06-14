@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QApplication
+from reportlab.pdfgen.canvas import Canvas
 from multiprocessing import cpu_count
 from pdfrw.buildxobj import pagexobj
 from locale import setlocale, LC_ALL
@@ -55,6 +56,7 @@ def get_pdf_template():  # Abre o modelo PDF. (Isso tem que ser feito aqui para 
     return pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
 
 
+built_in_fonts = Canvas('').getAvailableFonts()  # Todas as fontes já embutidas no ReportLab
 setlocale(LC_ALL, 'pt-BR.UTF-8')  # Localização é usado para formatar dinheiro quando há campo capital
 
 app = QApplication(argv)  # É necessário que o QApplication seja inicializado antes das possíveis janelas de erro e QDialogs que o podem vir a usá-lo.
@@ -174,6 +176,20 @@ finally:
         print('Erro ao carregar arquivo modelo PDF, pois ele não existe. Começando processo para selecioná-lo.')
         load_problem = True
         template_dir = critical_select_pdf()
+
+try:
+    text_font = dic['text_font']
+except (KeyError, TypeError):
+    print('Erro ao carregar fonte do texto, assumindo valor padrão de Times-Roman')
+    text_font = 'Times-Roman'
+    load_problem = True
+
+try:
+    text_size = dic['text_size']
+except (KeyError, TypeError):
+    print('Erro ao carregar tamanho do texto, assumindo valor padrão de 12')
+    text_size = 12
+    load_problem = True
 
 try:
     dist_left = dic['dist_left']

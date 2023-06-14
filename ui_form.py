@@ -4,9 +4,9 @@ from PySide6.QtWidgets import (QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLab
                                QVBoxLayout, QFormLayout, QSlider, QScrollArea, QPlainTextEdit, QComboBox, QCheckBox)
 from reader import get_coberturas, get_headers, get_cnv_values, push
 from emitter import emit_singular, emit_from_source
+from PySide6.QtGui import QIcon, QFont, QFontDatabase
 from multiprocessing import cpu_count
 from threading import active_count
-from PySide6.QtGui import QIcon
 from unidecode import unidecode
 from threading import Thread
 from neat import name as nm
@@ -14,7 +14,7 @@ from neat import cpf as cp
 from reader import get_cnv
 from time import sleep
 import var
-
+from os import listdir
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -694,8 +694,10 @@ class Ui_MainWindow(object):
 
         self.label_config_text_left = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_left.setObjectName(u"label_config_text_left")
+        sizePolicy3.setHeightForWidth(self.label_config_text_left.sizePolicy().hasHeightForWidth())
+        self.label_config_text_left.setSizePolicy(sizePolicy3)
 
-        self.formLayout.setWidget(19, QFormLayout.LabelRole, self.label_config_text_left)
+        self.formLayout.setWidget(21, QFormLayout.LabelRole, self.label_config_text_left)
 
         self.horizontalLayout_config_text_left = QHBoxLayout()
         self.horizontalLayout_config_text_left.setObjectName(u"horizontalLayout_config_text_left")
@@ -716,12 +718,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_text_left.addWidget(self.label_config_text_left_text)
 
 
-        self.formLayout.setLayout(19, QFormLayout.FieldRole, self.horizontalLayout_config_text_left)
+        self.formLayout.setLayout(21, QFormLayout.FieldRole, self.horizontalLayout_config_text_left)
 
         self.label_config_text_right = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_right.setObjectName(u"label_config_text_right")
+        sizePolicy3.setHeightForWidth(self.label_config_text_right.sizePolicy().hasHeightForWidth())
+        self.label_config_text_right.setSizePolicy(sizePolicy3)
 
-        self.formLayout.setWidget(20, QFormLayout.LabelRole, self.label_config_text_right)
+        self.formLayout.setWidget(22, QFormLayout.LabelRole, self.label_config_text_right)
 
         self.horizontalLayout_config_text_height = QHBoxLayout()
         self.horizontalLayout_config_text_height.setObjectName(u"horizontalLayout_config_text_height")
@@ -742,12 +746,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_text_height.addWidget(self.label_config_text_height_text)
 
 
-        self.formLayout.setLayout(20, QFormLayout.FieldRole, self.horizontalLayout_config_text_height)
+        self.formLayout.setLayout(22, QFormLayout.FieldRole, self.horizontalLayout_config_text_height)
 
         self.label_config_text_space = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_space.setObjectName(u"label_config_text_space")
+        sizePolicy3.setHeightForWidth(self.label_config_text_space.sizePolicy().hasHeightForWidth())
+        self.label_config_text_space.setSizePolicy(sizePolicy3)
 
-        self.formLayout.setWidget(21, QFormLayout.LabelRole, self.label_config_text_space)
+        self.formLayout.setWidget(23, QFormLayout.LabelRole, self.label_config_text_space)
 
         self.horizontalLayout_config_text_space = QHBoxLayout()
         self.horizontalLayout_config_text_space.setObjectName(u"horizontalLayout_config_text_space")
@@ -768,12 +774,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_text_space.addWidget(self.label_config_text_space_text)
 
 
-        self.formLayout.setLayout(21, QFormLayout.FieldRole, self.horizontalLayout_config_text_space)
+        self.formLayout.setLayout(23, QFormLayout.FieldRole, self.horizontalLayout_config_text_space)
 
         self.label_config_text_break = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_break.setObjectName(u"label_config_text_break")
+        sizePolicy3.setHeightForWidth(self.label_config_text_break.sizePolicy().hasHeightForWidth())
+        self.label_config_text_break.setSizePolicy(sizePolicy3)
 
-        self.formLayout.setWidget(22, QFormLayout.LabelRole, self.label_config_text_break)
+        self.formLayout.setWidget(24, QFormLayout.LabelRole, self.label_config_text_break)
 
         self.horizontalLayout_config_text_break = QHBoxLayout()
         self.horizontalLayout_config_text_break.setObjectName(u"horizontalLayout_config_text_break")
@@ -794,20 +802,20 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_text_break.addWidget(self.label_config_text_break_text)
 
 
-        self.formLayout.setLayout(22, QFormLayout.FieldRole, self.horizontalLayout_config_text_break)
+        self.formLayout.setLayout(24, QFormLayout.FieldRole, self.horizontalLayout_config_text_break)
 
         self.line_5 = QFrame(self.scrollAreaWidgetContents)
         self.line_5.setObjectName(u"line_5")
         self.line_5.setFrameShape(QFrame.HLine)
         self.line_5.setFrameShadow(QFrame.Sunken)
 
-        self.formLayout.setWidget(23, QFormLayout.SpanningRole, self.line_5)
+        self.formLayout.setWidget(26, QFormLayout.SpanningRole, self.line_5)
 
         self.label_config_text_editor_title = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_editor_title.setObjectName(u"label_config_text_editor_title")
         self.label_config_text_editor_title.setAlignment(Qt.AlignCenter)
 
-        self.formLayout.setWidget(24, QFormLayout.SpanningRole, self.label_config_text_editor_title)
+        self.formLayout.setWidget(27, QFormLayout.SpanningRole, self.label_config_text_editor_title)
 
         self.plainTextEdit_config = QPlainTextEdit(self.scrollAreaWidgetContents)
         self.plainTextEdit_config.setObjectName(u"plainTextEdit_config")
@@ -815,26 +823,26 @@ class Ui_MainWindow(object):
         self.plainTextEdit_config.setFrameShadow(QFrame.Sunken)
         self.plainTextEdit_config.setOverwriteMode(False)
 
-        self.formLayout.setWidget(25, QFormLayout.SpanningRole, self.plainTextEdit_config)
+        self.formLayout.setWidget(28, QFormLayout.SpanningRole, self.plainTextEdit_config)
 
         self.label_config_text_editor_description = QLabel(self.scrollAreaWidgetContents)
         self.label_config_text_editor_description.setObjectName(u"label_config_text_editor_description")
         self.label_config_text_editor_description.setWordWrap(True)
 
-        self.formLayout.setWidget(26, QFormLayout.SpanningRole, self.label_config_text_editor_description)
+        self.formLayout.setWidget(29, QFormLayout.SpanningRole, self.label_config_text_editor_description)
 
         self.line_6 = QFrame(self.scrollAreaWidgetContents)
         self.line_6.setObjectName(u"line_6")
         self.line_6.setFrameShape(QFrame.HLine)
         self.line_6.setFrameShadow(QFrame.Sunken)
 
-        self.formLayout.setWidget(27, QFormLayout.SpanningRole, self.line_6)
+        self.formLayout.setWidget(30, QFormLayout.SpanningRole, self.line_6)
 
         self.label_config_keywords_title = QLabel(self.scrollAreaWidgetContents)
         self.label_config_keywords_title.setObjectName(u"label_config_keywords_title")
         self.label_config_keywords_title.setAlignment(Qt.AlignCenter)
 
-        self.formLayout.setWidget(29, QFormLayout.SpanningRole, self.label_config_keywords_title)
+        self.formLayout.setWidget(32, QFormLayout.SpanningRole, self.label_config_keywords_title)
 
         self.horizontalLayout_config_name = QHBoxLayout()
         self.horizontalLayout_config_name.setObjectName(u"horizontalLayout_config_name")
@@ -855,7 +863,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_name.addWidget(self.lineEdit_config_name)
 
 
-        self.formLayout.setLayout(30, QFormLayout.SpanningRole, self.horizontalLayout_config_name)
+        self.formLayout.setLayout(33, QFormLayout.SpanningRole, self.horizontalLayout_config_name)
 
         self.horizontalLayout_config_cpf = QHBoxLayout()
         self.horizontalLayout_config_cpf.setObjectName(u"horizontalLayout_config_cpf")
@@ -875,7 +883,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cpf.addWidget(self.lineEdit_config_cpf)
 
 
-        self.formLayout.setLayout(31, QFormLayout.SpanningRole, self.horizontalLayout_config_cpf)
+        self.formLayout.setLayout(34, QFormLayout.SpanningRole, self.horizontalLayout_config_cpf)
 
         self.horizontalLayout_config_cnpj = QHBoxLayout()
         self.horizontalLayout_config_cnpj.setObjectName(u"horizontalLayout_config_cnpj")
@@ -895,7 +903,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cnpj.addWidget(self.lineEdit_config_cnpj)
 
 
-        self.formLayout.setLayout(32, QFormLayout.SpanningRole, self.horizontalLayout_config_cnpj)
+        self.formLayout.setLayout(35, QFormLayout.SpanningRole, self.horizontalLayout_config_cnpj)
 
         self.horizontalLayout_config_matricula = QHBoxLayout()
         self.horizontalLayout_config_matricula.setObjectName(u"horizontalLayout_config_matricula")
@@ -915,7 +923,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_matricula.addWidget(self.lineEdit_config_matricula)
 
 
-        self.formLayout.setLayout(33, QFormLayout.SpanningRole, self.horizontalLayout_config_matricula)
+        self.formLayout.setLayout(36, QFormLayout.SpanningRole, self.horizontalLayout_config_matricula)
 
         self.horizontalLayout_config_cliente = QHBoxLayout()
         self.horizontalLayout_config_cliente.setObjectName(u"horizontalLayout_config_cliente")
@@ -935,7 +943,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cliente.addWidget(self.lineEdit_config_cliente)
 
 
-        self.formLayout.setLayout(34, QFormLayout.SpanningRole, self.horizontalLayout_config_cliente)
+        self.formLayout.setLayout(37, QFormLayout.SpanningRole, self.horizontalLayout_config_cliente)
 
         self.horizontalLayout_config_apolice = QHBoxLayout()
         self.horizontalLayout_config_apolice.setObjectName(u"horizontalLayout_config_apolice")
@@ -955,7 +963,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_apolice.addWidget(self.lineEdit_config_apolice)
 
 
-        self.formLayout.setLayout(35, QFormLayout.SpanningRole, self.horizontalLayout_config_apolice)
+        self.formLayout.setLayout(38, QFormLayout.SpanningRole, self.horizontalLayout_config_apolice)
 
         self.horizontalLayout_config_cobertura = QHBoxLayout()
         self.horizontalLayout_config_cobertura.setObjectName(u"horizontalLayout_config_cobertura")
@@ -975,7 +983,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cobertura.addWidget(self.lineEdit_config_cobertura)
 
 
-        self.formLayout.setLayout(37, QFormLayout.SpanningRole, self.horizontalLayout_config_cobertura)
+        self.formLayout.setLayout(40, QFormLayout.SpanningRole, self.horizontalLayout_config_cobertura)
 
         self.horizontalLayout_config_cnv = QHBoxLayout()
         self.horizontalLayout_config_cnv.setObjectName(u"horizontalLayout_config_cnv")
@@ -996,13 +1004,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_cnv.addWidget(self.lineEdit_config_cnv)
 
 
-        self.formLayout.setLayout(38, QFormLayout.SpanningRole, self.horizontalLayout_config_cnv)
+        self.formLayout.setLayout(41, QFormLayout.SpanningRole, self.horizontalLayout_config_cnv)
 
         self.label_config_keywords_description = QLabel(self.scrollAreaWidgetContents)
         self.label_config_keywords_description.setObjectName(u"label_config_keywords_description")
         self.label_config_keywords_description.setWordWrap(True)
 
-        self.formLayout.setWidget(39, QFormLayout.SpanningRole, self.label_config_keywords_description)
+        self.formLayout.setWidget(42, QFormLayout.SpanningRole, self.label_config_keywords_description)
 
         self.horizontalLayout_config_capital = QHBoxLayout()
         self.horizontalLayout_config_capital.setObjectName(u"horizontalLayout_config_capital")
@@ -1020,7 +1028,75 @@ class Ui_MainWindow(object):
         self.horizontalLayout_config_capital.addWidget(self.lineEdit_config_capital)
 
 
-        self.formLayout.setLayout(36, QFormLayout.SpanningRole, self.horizontalLayout_config_capital)
+        self.formLayout.setLayout(39, QFormLayout.SpanningRole, self.horizontalLayout_config_capital)
+
+        self.label_config_text_size = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_text_size.setObjectName(u"label_config_text_size")
+        sizePolicy3.setHeightForWidth(self.label_config_text_size.sizePolicy().hasHeightForWidth())
+        self.label_config_text_size.setSizePolicy(sizePolicy3)
+
+        self.formLayout.setWidget(20, QFormLayout.LabelRole, self.label_config_text_size)
+
+        self.label_config_font = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_font.setObjectName(u"label_config_font")
+        sizePolicy3.setHeightForWidth(self.label_config_font.sizePolicy().hasHeightForWidth())
+        self.label_config_font.setSizePolicy(sizePolicy3)
+
+        self.formLayout.setWidget(19, QFormLayout.LabelRole, self.label_config_font)
+
+        self.horizontalLayout_config_text_size = QHBoxLayout()
+        self.horizontalLayout_config_text_size.setObjectName(u"horizontalLayout_config_text_size")
+        self.horizontalSlider_config_text_size = QSlider(self.scrollAreaWidgetContents)
+        self.horizontalSlider_config_text_size.setObjectName(u"horizontalSlider_config_text_size")
+        self.horizontalSlider_config_text_size.setMinimum(6)
+        self.horizontalSlider_config_text_size.setMaximum(16)
+        self.horizontalSlider_config_text_size.setValue(10)
+        self.horizontalSlider_config_text_size.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_config_text_size.addWidget(self.horizontalSlider_config_text_size)
+
+        self.label_config_text_size_text = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_text_size_text.setObjectName(u"label_config_text_size_text")
+        sizePolicy7 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.label_config_text_size_text.sizePolicy().hasHeightForWidth())
+        self.label_config_text_size_text.setSizePolicy(sizePolicy7)
+        self.label_config_text_size_text.setMinimumSize(QSize(20, 0))
+        self.label_config_text_size_text.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.horizontalLayout_config_text_size.addWidget(self.label_config_text_size_text)
+
+
+        self.formLayout.setLayout(20, QFormLayout.FieldRole, self.horizontalLayout_config_text_size)
+
+        self.comboBox_config_font = QComboBox(self.scrollAreaWidgetContents)
+        self.comboBox_config_font.setObjectName(u"comboBox_config_font")
+
+        self.formLayout.setWidget(19, QFormLayout.FieldRole, self.comboBox_config_font)
+
+        self.pushButton_config_load_font = QPushButton(self.scrollAreaWidgetContents)
+        self.pushButton_config_load_font.setObjectName(u"pushButton_config_load_font")
+        self.pushButton_config_load_font.setMinimumSize(QSize(0, 30))
+        self.pushButton_config_load_font.setAutoExclusive(False)
+
+        self.formLayout.setWidget(25, QFormLayout.LabelRole, self.pushButton_config_load_font)
+
+        self.verticalLayout_config_load_font = QVBoxLayout()
+        self.verticalLayout_config_load_font.setObjectName(u"verticalLayout_config_load_font")
+        self.label_config_example_text_text = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_example_text_text.setObjectName(u"label_config_example_text_text")
+
+        self.verticalLayout_config_load_font.addWidget(self.label_config_example_text_text)
+
+        self.label_config_example_text = QLabel(self.scrollAreaWidgetContents)
+        self.label_config_example_text.setObjectName(u"label_config_example_text")
+        self.label_config_example_text.setWordWrap(True)
+
+        self.verticalLayout_config_load_font.addWidget(self.label_config_example_text)
+
+
+        self.formLayout.setLayout(25, QFormLayout.FieldRole, self.verticalLayout_config_load_font)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -1033,10 +1109,6 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         # Coisas adicionadas manualmente, e não pelo PyCreator. --------------------------------------------------------
-        try:
-            MainWindow.setWindowIcon(QIcon('dados/ícone.ico'))
-        except FileNotFoundError:
-            pass
         self.listWidget_singular_cobertura.addItems(get_coberturas(var.cobertura_dir))
         self.horizontalSlider_config_max_threads.setValue(var.max_threads)
         self.horizontalSlider_config_target_threads.setValue(var.target_threads)
@@ -1062,6 +1134,20 @@ class Ui_MainWindow(object):
         self.lineEdit_config_capital.setText(';'.join(var.capital_keywords))
         self.lineEdit_config_cobertura.setText(';'.join(var.cobertura_keywords))
         self.lineEdit_config_cnv.setText(';'.join(var.cnv_keywords))
+        self.comboBox_singular_cnv.addItems(get_cnv_values(var.cnv_dir))
+        self.comboBox_config_font.addItems([font for font in listdir('dados\\fontes\\')])
+        self.horizontalSlider_config_text_size.setValue(var.text_size)
+        self.label_config_example_text.setFont(QFont(f"{var.text_font.replace('.ttf', '').replace('.TTF', '').replace('.ttc', '').replace('.TTC', '')}", var.text_size))
+
+        try:
+            self.comboBox_config_font.setCurrentIndex(self.comboBox_config_font.findText(var.text_font))
+        except ValueError:
+            pass
+
+        try:
+            MainWindow.setWindowIcon(QIcon('dados\\ícone.ico'))
+        except FileNotFoundError:
+            print('Arquivo ícone não encontrado.')
         # Fim das coisas adicionadas manualmente. Essas linhas devem estar ACIMA dos connects com os slots. ------------
 
         self.retranslateUi(MainWindow)
@@ -1100,6 +1186,8 @@ class Ui_MainWindow(object):
         self.checkBox_singular_allow_cnv.toggled.connect(self.comboBox_singular_cnv.setEnabled)
         self.lineEdit_config_cnv.textEdited.connect(self.change_cnv_keywords)
         self.lineEdit_config_capital.textEdited.connect(self.change_capital_keywords)
+        self.horizontalSlider_config_text_size.valueChanged.connect(self.change_text_size)
+        self.comboBox_config_font.currentTextChanged.connect(self.change_text_font)
 
         self.tabWidget.setCurrentIndex(2)
         self.pushButton_multiple_output.setDefault(False)
@@ -1174,7 +1262,7 @@ class Ui_MainWindow(object):
         self.label_config_text_break.setText(QCoreApplication.translate("MainWindow", u"Caracteres ante quebra de linha:", None))
         self.label_config_text_break_text.setText(QCoreApplication.translate("MainWindow", u"80", None))
         self.label_config_text_editor_title.setText(QCoreApplication.translate("MainWindow", u"Editor de texto do PDF", None))
-        self.label_config_text_editor_description.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Use os formato &lt;NOME&gt;, &lt;CPF&gt;, &lt;MATRICULA&gt;, &lt;CLIENTE&gt;, &lt;CNPJ&gt;, &lt;APOLICE&gt;, &lt;COBERTURA&gt;, &lt;COMECO&gt; e &lt;FINAL&gt; para os respectivos campos din\u00e2micos. N\u00e3o digite os campos din\u00e2micos com acentos, ou eles n\u00e3o ser\u00e3o interpretados corretamente pelo programa. Quaisquer quebras de linha digitadas nessa caixa ser\u00e3o desconsideradas, as quebras de linha s\u00e3o feitas automaticamente pelo programa na gera\u00e7\u00e3o do texto final de cada PDF.</p></body></html>", None))
+        self.label_config_text_editor_description.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Use os formato &lt;NOME&gt;, &lt;CPF&gt;, &lt;MATRICULA&gt;, &lt;CLIENTE&gt;, &lt;CNPJ&gt;, &lt;APOLICE&gt;, &lt;COBERTURA&gt;, &lt;COMECO&gt; e &lt;FINAL&gt; para os respectivos campos din\u00e2micos. N\u00e3o digite os campos din\u00e2micos com acentos, ou eles n\u00e3o ser\u00e3o interpretados corretamente pelo programa. Al\u00e9m das quebras de linhas manuais o programa divide as linhas automaticamente caso estejam muito grandes.</p></body></html>", None))
         self.label_config_keywords_title.setText(QCoreApplication.translate("MainWindow", u"Palavras-chave", None))
         self.label_config_name.setText(QCoreApplication.translate("MainWindow", u"Nome:", None))
         self.label_config_cpf.setText(QCoreApplication.translate("MainWindow", u"CPF:", None))
@@ -1186,6 +1274,12 @@ class Ui_MainWindow(object):
         self.label_config_cnv.setText(QCoreApplication.translate("MainWindow", u"CNV:", None))
         self.label_config_keywords_description.setText(QCoreApplication.translate("MainWindow", u"Estas s\u00e3o palavras-chaves que o programa procurar\u00e1 na primeira linha das planilhas numa tentativa de encontrar as colunas dos campos repectivos. Letras mai\u00fasculas e acentos ser\u00e3o desconsiderados. Separe cada palavra-chave com um ponto e v\u00edrgula ( ; ). Uma planilha n\u00e3o precisa ter simultaneamente uma coluna para cobertura e para CNV, apenas um \u00e9 necess\u00e1rio. Ademais, se o programa n\u00e3o encontrar todas as colunas necess\u00e1rias, ele lhe perguntar\u00e1 se deve prosseguir ou abortar.", None))
         self.label_config_capital.setText(QCoreApplication.translate("MainWindow", u"Capital:", None))
+        self.label_config_text_size.setText(QCoreApplication.translate("MainWindow", u"Tamanho do texto:", None))
+        self.label_config_font.setText(QCoreApplication.translate("MainWindow", u"Fonte:", None))
+        self.label_config_text_size_text.setText(QCoreApplication.translate("MainWindow", u"10", None))
+        self.pushButton_config_load_font.setText(QCoreApplication.translate("MainWindow", u"Carregar nova fonte", None))
+        self.label_config_example_text_text.setText(QCoreApplication.translate("MainWindow", u"Texto exemplo para fonte selecionada:", None))
+        self.label_config_example_text.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis, felis ut adipiscing. 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.</p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_config), QCoreApplication.translate("MainWindow", u"Configura\u00e7\u00f5es", None))
 
         # Coisas adicionadas manualmente. ------------------------------------------------------------------------------
@@ -1204,6 +1298,7 @@ class Ui_MainWindow(object):
         self.label_config_text_height_text.setText(QCoreApplication.translate("MainWindow", f"{var.text_height}", None))
         self.label_config_text_space_text.setText(QCoreApplication.translate("MainWindow", f"{var.line_space}", None))
         self.label_config_text_break_text.setText(QCoreApplication.translate("MainWindow", f"{var.max_chars}", None))
+        self.label_config_text_size_text.setText(QCoreApplication.translate("MainWindow", f"{var.text_size}", None))
 
         self.label_config_source_text.setText(var.data_dir)
         self.label_config_output_dir_text.setText(var.output_dir)
@@ -1433,11 +1528,12 @@ class Ui_MainWindow(object):
             cnv = False
 
         name = self.lineEdit_singular_name.text()
-        cpf = self.lineEdit_singular_cpf.text()
+        cpf  = self.lineEdit_singular_cpf.text()
         cnpj = self.lineEdit_singular_cnpj.text()
         clie = self.lineEdit_singular_client.text()
         matr = self.lineEdit_singular_matricula.text()
         apol = self.lineEdit_singular_apolice.text()
+        capi = self.lineEdit_singular_capital.text()
 
         if var.output_dir == '':
             warning = QMessageBox()
@@ -1446,84 +1542,70 @@ class Ui_MainWindow(object):
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif apol == '':
+        elif apol == '' and any(var.apolice_keywords):
             warning = QMessageBox()
             warning.setText('Preencha o campo apólice.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif any(char.isalpha() for char in apol):
-            warning = QMessageBox()
-            warning.setText('Não digite letras na apólice.')
-            warning.setIcon(QMessageBox.Icon.Warning)
-            warning.setWindowTitle('AVISO')
-            warning.exec()
-
-        elif name == '':
+        elif name == '' and any(var.name_keywords):
             warning = QMessageBox()
             warning.setText('Preencha o campo nome.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif any(char.isdigit() for char in name):
+        elif any(char.isdigit() for char in name) and any(var.name_keywords):
             warning = QMessageBox()
             warning.setText('Não digite números no nome.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif cpf == '':
+        elif cpf == '' and any(var.cpf_keywords):
             warning = QMessageBox()
             warning.setText('Preencha o campo cpf.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif not cpf.isdecimal():
+        elif not cpf.isdecimal() and any(var.cpf_keywords):
             warning = QMessageBox()
             warning.setText('Digite apenas números no campo CPF')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif cnpj == '':
+        elif cnpj == '' and any(var.cnpj_keywords):
             warning = QMessageBox()
             warning.setText('Preencha o campo cnpj.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif not cnpj.isdecimal():
+        elif not cnpj.isdecimal() and any(var.cnpj_keywords):
             warning = QMessageBox()
             warning.setText('Digite apenas números no campo CNPJ')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif matr == '':
+        elif matr == '' and any(var.matricula_keywords):
             warning = QMessageBox()
             warning.setText('Preencha o campo matrícula.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif not matr.isdecimal():
-            warning = QMessageBox()
-            warning.setText('Digite apenas números no campo Matrícula')
-            warning.setIcon(QMessageBox.Icon.Warning)
-            warning.setWindowTitle('AVISO')
-            warning.exec()
-
-        elif cobe == '':
+        elif cobe == '' and any(var.cobertura_keywords):
             warning = QMessageBox()
             warning.setText('Selecione uma cobertura')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif clie == '':
+        elif clie == '' and any(var.cliente_keywords):
             warning = QMessageBox()
             warning.setText('Preencha o campo cliente')
             warning.setIcon(QMessageBox.Icon.Warning)
@@ -1544,20 +1626,14 @@ class Ui_MainWindow(object):
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif len(matr) > 6:
-            warning = QMessageBox()
-            warning.setText('Matrícula digitada tem mais de 6 dígitos.')
-            warning.setIcon(QMessageBox.Icon.Warning)
-            warning.setWindowTitle('AVISO')
-            warning.exec()
-
         else:
             if cnv is False:
-                emit_singular(name, cpf, cnpj, matr, clie, apol, cobe, '')
+                emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe, '')
             else:
-                emit_singular(name, cpf, cnpj, matr, clie, apol, '', cnv_df.loc[cnv])
+                emit_singular(name, cpf, cnpj, matr, clie, apol, capi, '', cnv_df.loc[cnv])
 
             self.label_console.setText(f'arquivo {cp(cpf)} - {nm(name)} emitido com êxito.')
+            var.progress = 0
 
     def change_coberturas_file(self):
         file = QFileDialog.getOpenFileName()[0]
@@ -1707,6 +1783,24 @@ class Ui_MainWindow(object):
         push('end_period', var.end_period)
 
         self.label_console.setText('Data de vigência final padrão atualizada.')
+
+    def change_text_font(self):
+        var.text_font = self.comboBox_config_font.currentText()
+        QFontDatabase.addApplicationFont(var.text_font)
+        self.label_config_example_text.setFont(QFont(
+            f"{var.text_font.replace('.ttf', '').replace('.TTF', '').replace('.ttc', '').replace('.TTC', '')}", var.text_size))
+
+        push('text_font', var.text_font)
+        self.label_console.setText('Fonte atualizada.')
+
+    def change_text_size(self):
+        self.label_config_text_size_text.setNum(self.horizontalSlider_config_text_size.value())
+
+        var.text_size = self.horizontalSlider_config_text_size.value()
+        self.label_config_example_text.setFont(QFont('Arial', var.text_size))
+        push('text_size', var.text_size)
+
+        self.label_console.setText('Tamanho do texto atualizado.')
 
     def change_left_spacing(self):
         self.label_config_text_left_text.setNum(self.horizontalSlider_config_text_left.value())

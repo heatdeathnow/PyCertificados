@@ -9,18 +9,22 @@ def name(x):
 
 
 def capi(x):
-    if isna(x) or x == 'ERRO':
+    try:
+        if isna(x) or x == 'ERRO' or x == '':
+            x = 0.0
+
+        # Isso só faz sentido assumindo que a localidade do arquivo Excel cujos dados foram extraídos está em pt-BR
+        # Isso causará erros se isso não for verdadeiro.
+        # todo Fazer isso de uma maneira mais independente
+        elif type(x) == str:
+            x = x.replace('.', '').replace('R', '').replace('$', '').strip()
+            x = float(x.replace(',', '.'))
+
+        elif type(x) in (float64, int64):
+            x = float(x)
+
+    except ValueError:
         x = 0.0
-
-    # Isso só faz sentido assumindo que a localidade do arquivo Excel cujos dados foram extraídos está em pt-BR
-    # Isso causará erros se isso não for verdadeiro.
-    # todo Fazer isso de uma maneira mais independente
-    elif type(x) == str:
-        x = x.replace('.', '').replace('R', '').replace('$', '').strip()
-        x = float(x.replace(',', '.'))
-
-    elif type(x) in (float64, int64):
-        x = float(x)
 
     return currency(x, grouping=True)
 
