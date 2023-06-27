@@ -1189,9 +1189,7 @@ class Ui_MainWindow(object):
         self.horizontalSlider_config_text_size.valueChanged.connect(self.change_text_size)
         self.comboBox_config_font.currentTextChanged.connect(self.change_text_font)
 
-        self.tabWidget.setCurrentIndex(2)
         self.pushButton_multiple_output.setDefault(False)
-
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -1542,84 +1540,84 @@ class Ui_MainWindow(object):
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif apol == '' and any(var.apolice_keywords):
+        elif apol == '' and '<APOLICE>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Preencha o campo apólice.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif name == '' and any(var.name_keywords):
+        elif name == '' and '<NOME>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Preencha o campo nome.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif any(char.isdigit() for char in name) and any(var.name_keywords):
+        elif any(char.isdigit() for char in name) and '<NOME>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Não digite números no nome.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif cpf == '' and any(var.cpf_keywords):
+        elif cpf == '' and '<CPF>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Preencha o campo cpf.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif not cpf.isdecimal() and any(var.cpf_keywords):
+        elif not cpf.isdecimal() and '<CPF>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Digite apenas números no campo CPF')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif cnpj == '' and any(var.cnpj_keywords):
+        elif cnpj == '' and '<CNPJ>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Preencha o campo cnpj.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif not cnpj.isdecimal() and any(var.cnpj_keywords):
+        elif not cnpj.isdecimal() and '<CNPJ>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Digite apenas números no campo CNPJ')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif matr == '' and any(var.matricula_keywords):
+        elif matr == '' and '<MATRICULA>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Preencha o campo matrícula.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif cobe == '' and any(var.cobertura_keywords):
+        elif cobe == '' and '<COBERTURA>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Selecione uma cobertura')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif clie == '' and any(var.cliente_keywords):
+        elif clie == '' and '<CLIENTE>' in var.base_text:
             warning = QMessageBox()
             warning.setText('Preencha o campo cliente')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif len(cpf) > 11:
+        elif len(cpf) > 11 and '<CPF>' in var.base_text:
             warning = QMessageBox()
             warning.setText('CPF digitado tem mais de 11 dígitos.')
             warning.setIcon(QMessageBox.Icon.Warning)
             warning.setWindowTitle('AVISO')
             warning.exec()
 
-        elif len(cnpj) > 14:
+        elif len(cnpj) > 14 and '<CNPJ>' in var.base_text:
             warning = QMessageBox()
             warning.setText('CNPJ digitado tem mais de 14 dígitos.')
             warning.setIcon(QMessageBox.Icon.Warning)

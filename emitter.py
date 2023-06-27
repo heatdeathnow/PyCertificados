@@ -28,7 +28,7 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
     text = text.replace('<CPF>', neat.cpf(cpf))
     text = text.replace('<CNPJ>', neat.cnpj(cnpj))
     text = text.replace('<MATRICULA>', neat.matr(matr))
-    text = text.replace('<CLIENTE>', str(clie))
+    text = text.replace('<CLIENTE>', neat.name(clie))
     text = text.replace('<APOLICE>', str(apol))
     text = text.replace('<COMECO>', f'{var.start_period.day:02}/{var.start_period.month:02}/{var.start_period.year}')
     text = text.replace('<FINAL>', f'{var.end_period.day:02}/{var.end_period.month:02}/{var.end_period.year}')
