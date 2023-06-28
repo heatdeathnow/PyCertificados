@@ -36,7 +36,7 @@ def cpf(x):
     elif type(x) in (float64, int64, int):
         x = str(int(trunc(x)))
 
-    x = x.replace('.', '').replace('-', '').replace('/', '').strip()
+    x = x.replace('.', '').replace('-', '').replace('/', '').replace('\\', '').strip()
 
     # Se tiver faltando números no CPF, adiciona zeros no começo.
     if len(x) < 11:
@@ -56,16 +56,13 @@ def cnpj(x):
     elif type(x) in (float64, int64, int):
         x = str(int(trunc(x)))
 
-    x = x.replace('.', '').replace('-', '').replace('/', '').strip()
+    x = x.replace('.', '').replace('-', '').replace('/', '').replace('\\', '').strip()
 
     # Se tiver faltando números no CNPJ, adiciona zeros no começo.
     if len(x) < 14:
         x = '0' * (14 - len(x)) + x
 
-    elif len(x) <= 15:
-        x = x.replace('0', '', 1)
-
-    else:
+    elif len(x) > 14:
         raise Exception(f'CNPJ "{x}" tem caracteres demais')
 
     # Formata e retorna o CNPJ.
