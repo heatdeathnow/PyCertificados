@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QApplication
+from pdfrw.buildxobj import pagexobj, PdfDict
 from reportlab.pdfgen.canvas import Canvas
 from multiprocessing import cpu_count
-from pdfrw.buildxobj import pagexobj
 from locale import setlocale, LC_ALL
 from pdfrw import PdfReader
 from yaml import safe_load
@@ -11,7 +11,11 @@ from os import getcwd
 from sys import argv
 
 
-def critical_select_sheet(name):
+def critical_select_sheet(name: str) -> str | None:
+    """
+    Quando o programa falha em encontrar alguma planilha essencial que ele precisa para funcionar, ele exigirá que uma seja selecionada, ou terminará.
+    """
+
     while True:
         warning = QMessageBox()
         warning.setWindowTitle('AVISO')
@@ -31,7 +35,11 @@ def critical_select_sheet(name):
             exit()
 
 
-def critical_select_pdf():
+def critical_select_pdf() -> str | None:
+    """
+    Quando o programa falhar em encontrar o arquivo PDF modelo, ele exigirá que um seja selecionado ou terminará.
+    """
+
     while True:
         warning = QMessageBox()
         warning.setWindowTitle('AVISO')
@@ -51,9 +59,13 @@ def critical_select_pdf():
             exit()
 
 
-def get_pdf_template():  # Abre o modelo PDF. (Isso tem que ser feito aqui para poder mudá-lo posteriormente nas configurações)
+def get_pdf_template() -> PdfDict:  # Abre o modelo PDF. (Isso tem que ser feito aqui para poder mudá-lo posteriormente nas configurações)
+    """
+    Carrega o modelo PDF na memória e o retorna, onde ele poderá ser utilizado para construir outros PDFs a partir de si e de um texto.
+    """
+
     template = PdfReader(template_dir, decompress=False)
-    return pagexobj(template.pages[0])  # Carrega um objeto do PDF modelo.
+    return pagexobj(template.pages[0])  # Retorna um objeto do PDF modelo.
 
 
 built_in_fonts = Canvas('').getAvailableFonts()  # Todas as fontes já embutidas no ReportLab

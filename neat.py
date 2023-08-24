@@ -1,14 +1,22 @@
 from numpy import trunc, float64, int64
 from unidecode import unidecode
-from pandas import isna
 from locale import currency
+from pandas import isna
 
 
-def name(x):
-    return unidecode(str(x).upper())  # Remove acentos e transforma o texto em CAIXA ALTA.
+def name(x) -> str:
+    """
+    Retorna o nome em CAIXA ALTA e sem acentos.
+    """
+
+    return unidecode(str(x).upper())
 
 
-def capi(x):
+def capi(x) -> str:
+    """
+    Retorna o capital formatado para R$ XXX.XXX,XX
+    """
+
     try:
         if isna(x) or x == 'ERRO' or x == '':
             x = 0.0
@@ -16,11 +24,11 @@ def capi(x):
         # Isso só faz sentido assumindo que a localidade do arquivo Excel cujos dados foram extraídos está em pt-BR
         # Isso causará erros se isso não for verdadeiro.
         # todo Fazer isso de uma maneira mais independente
-        elif type(x) == str:
+        elif isinstance(x, str):
             x = x.replace('.', '').replace('R', '').replace('$', '').strip()
             x = float(x.replace(',', '.'))
 
-        elif type(x) in (float64, int64):
+        elif isinstance(x, (float64, int64)):
             x = float(x)
 
     except ValueError:
@@ -29,11 +37,11 @@ def capi(x):
     return currency(x, grouping=True)
 
 
-def cpf(x):
+def cpf(x) -> str:
     if isna(x):
         x = ''
 
-    elif type(x) in (float64, int64, int):
+    elif isinstance(x, (float64, int64, int, float)):
         x = str(int(trunc(x)))
 
     x = x.replace('.', '').replace('-', '').replace('/', '').replace('\\', '').strip()
@@ -49,11 +57,11 @@ def cpf(x):
     return x[:3] + '.' + x[3:6] + '.' + x[6:9] + '-' + x[9:]
 
 
-def cnpj(x):
+def cnpj(x) -> str:
     if isna(x):
         x = ''
 
-    elif type(x) in (float64, int64, int):
+    elif isinstance(x, (float64, int64, int, float)):
         x = str(int(trunc(x)))
 
     x = x.replace('.', '').replace('-', '').replace('/', '').replace('\\', '').strip()
@@ -69,11 +77,11 @@ def cnpj(x):
     return x[:2] + '.' + x[2:5] + '.' + x[5:8] + '/' + x[8:12] + '-' + x[12:]
 
 
-def matr(x):
+def matr(x) -> str:
     if isna(x):
         x = ''
 
-    elif type(x) in (float64, int64, int):
+    elif isinstance(x, (float64, int64, int, float)):
         x = str(int(trunc(x)))
 
     if len(x) < 6:
@@ -82,11 +90,11 @@ def matr(x):
     return x
 
 
-def cnv(x):
-    if isna(x) or type(x) == str:
+def cnv(x) -> str:
+    if isna(x):
         return 'GERENTES'
 
-    elif type(x) in (float64, int64, int):
+    elif isinstance(x, (float64, int64, float, int)):
         x = str(int(trunc(x)))
 
     if len(x) < 4:

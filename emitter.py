@@ -13,8 +13,11 @@ import neat
 import var
 
 
-# Método usado para emitir um certificado. Leva nome, CPF, CNPJ, matrícula, cliente, apólice e coberturas ou código.
-def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
+def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv='') -> None:
+    """
+    Método usado para emitir um certificado. Leva nome, CPF, CNPJ, matrícula, cliente, apólice e coberturas ou código. Retorna nada.
+    """
+
     with var.lock:
         if var.progress == 0:
             # Configura a fonte a ser usada no PDF
@@ -38,7 +41,7 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
         text = text.replace('<COBERTURA>', cobe)
 
     else:
-        text = text.replace('<COBERTURA>', cnv)
+        text = text.replace('<COBERTURA>', str(cnv))
 
     canvas = Canvas(f'{var.output_dir}{neat.cpf(cpf)} - {neat.name(name)}.pdf')  # Objeto do texto a ser salvo.
     canvas.setFont(var.text_font, var.text_size)  # Seleciona esse fonte para ser usada
@@ -61,7 +64,11 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv=''):
     canvas.save()  # Função I/O-intensiva para salvar o arquivo da memória para o armazenamento do computador.
 
 
-def emit_from_source():  # Função para emitir diversos certificados advindos de uma fonte de dados externa.
+def emit_from_source() -> None:
+    """
+    Função para emitir diversos certificados advindos de uma fonte de dados externa.
+    """
+
     start_time = time()  # Horário do começo da emissão.
     cnv = get_cnv(var.cnv_dir)
 
@@ -180,9 +187,9 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
 
         if marginal_cert != var.progress:
             try:
-                print(f'Velocidade marginal: {(var.progress - marginal_cert) / (time() - marginal_time):07.2f} certificados por segundo. | Threads ativas: {active_count():03}. | Progresso: {var.progress:04} de {var.max_progress:04}. | j: {j:04}. | needed: {needed}')
+                print(f'Velocidade marginal: {(var.progress - marginal_cert) / (time() - marginal_time):07.2f} certificados por segundo. | Threads ativas: {active_count():03}. | Progresso: {var.progress:04} de {var.max_progress:04}. | Iniciados: {j:04}. | Threads requeridas: {needed}.')
             except ZeroDivisionError:
-                print(f'Velocidade marginal: 9999.99 certificados por segundo. | Threads ativas: {active_count():03}. | Progresso: {var.progress:04} de {var.max_progress:04}. | j: {j:04}.')
+                print(f'Velocidade marginal: 9999.99 certificados por segundo. | Threads ativas: {active_count():03}. | Progresso: {var.progress:04} de {var.max_progress:04}. | Iniciados: {j:04}. | Threads requeridas: {needed}.')
             marginal_time = time()
             marginal_cert = var.progress
 
@@ -197,4 +204,3 @@ def emit_from_source():  # Função para emitir diversos certificados advindos d
     var.progress = 0
     print(f'Tempo levado para salvar {var.max_progress} arquivos PDF da memória para o disco: {(time() - emit_time) / 60:.2f} minutos')
     print(f'Velocidade média: {var.certificates_per_second:.2f}')
-

@@ -1,10 +1,10 @@
-from PySide6.QtCore import (QCoreApplication, QDate, QMetaObject, QSize, Qt)
 from PySide6.QtWidgets import (QDateEdit, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,
                                QProgressBar, QPushButton, QSizePolicy, QTabWidget, QWidget, QMessageBox, QFileDialog,
                                QVBoxLayout, QFormLayout, QSlider, QScrollArea, QPlainTextEdit, QComboBox, QCheckBox)
+from PySide6.QtCore import (QCoreApplication, QDate, QMetaObject, QSize, Qt)
 from reader import get_coberturas, get_headers, get_cnv_values, push
-from emitter import emit_singular, emit_from_source
 from PySide6.QtGui import QIcon, QFont, QFontDatabase
+from emitter import emit_singular, emit_from_source
 from multiprocessing import cpu_count
 from threading import active_count
 from unidecode import unidecode
@@ -13,8 +13,9 @@ from neat import name as nm
 from neat import cpf as cp
 from reader import get_cnv
 from time import sleep
-import var
 from os import listdir
+import var
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):

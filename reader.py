@@ -1,4 +1,4 @@
-from pandas import read_excel, read_csv
+from pandas import read_excel, read_csv, DataFrame
 from yaml import safe_load, safe_dump
 from multiprocessing import Process
 from unidecode import unidecode
@@ -18,7 +18,7 @@ class SubLoader(Process):
         self.lock = lock
         self.loadtime = time()
 
-    def run(self):
+    def run(self) -> None:
         if self.path[-4:] == "xlsx" or self.path[-4:] == ".xls" or self.path[-4:] == "xlsm":
             with self.lock:
                 self.list[self.i] = read_excel(self.path, skiprows=self.skiprows, nrows=self.nrows, header=None)
@@ -30,8 +30,12 @@ class SubLoader(Process):
         print(f'Tempo levado para o {self.i + 1}º processo carregar {len(self.list[self.i].index)} linhas na memória: {(time() - self.loadtime):.2f} segundos.')
 
 
-# Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com o seu conteúdo. Frequentemente usado para ler apenas parte do arquivo.
-def load(path, **kwargs):
+def load(path: str, **kwargs) -> DataFrame:
+    """
+    Função que distingue entre arquivos Excel e CSV, os lê e retorna um dataframe com o seu conteúdo. Frequentemente usado para ler apenas parte 
+    do arquivo.
+    """
+
     if path[-4:] == "xlsx" or path[-4:] == ".xls" or path[-4:] == "xlsm":
         return read_excel(path, **kwargs)
 
@@ -39,8 +43,12 @@ def load(path, **kwargs):
         return read_csv(path, sep=';', **kwargs)
 
 
-# Lê todos os códigos de cobertura num arquivo externo e retorna a relação cifras-coberturas num dataframe (usado para a emissão de múltiplos certificados).
-def get_cnv(path):
+def get_cnv(path: str) -> DataFrame:
+    """
+    Lê todos os códigos de cobertura num arquivo externo e retorna a relação cifras-coberturas num dataframe 
+    (usado para a emissão de múltiplos certificados).
+    """
+
     df = load(path)
     df = df.set_index('CNV')
     df = df.squeeze()
@@ -48,7 +56,11 @@ def get_cnv(path):
     return df
 
 
-def get_cnv_values(path):
+def get_cnv_values(path: str) -> list:
+    """
+    Variável é um string que representa o caminho do diretório da tabela onde estão os CNV e retorna uma lista com todos os CNV válidos.
+    """
+
     df = load(path)
     cnv = []
     from pandas import isna
@@ -59,8 +71,11 @@ def get_cnv_values(path):
     return cnv
 
 
-# Lê um arquivo externo com todas as possibilidades de coberturas (usado para a emissão de certificados individuais).
-def get_coberturas(path):
+def get_coberturas(path: str) -> list:
+    """
+    Lê um arquivo externo com todas as possibilidades de coberturas (usado para a emissão de certificados individuais).
+    """
+
     df = load(path, header=None)
     df.columns = df.iloc[0]
     cobe = []
@@ -74,8 +89,12 @@ def get_coberturas(path):
     return cobe
 
 
-# Função que olha todos os cabeçários da planilha e compara os seus nomes com palavras-chave. Usado para descobrir onde estão os dados que serão usados numa planilha desconhecida.
-def get_headers(path):
+def get_headers(path: str) -> dict[str, str]:
+    """
+    Função que olha todos os cabeçários da planilha e compara os seus nomes com palavras-chave. Usado para descobrir onde estão os dados que 
+    serão usados numa planilha desconhecida.
+    """
+
     df = load(path, nrows=1)
 
     headers = {'name': '',
@@ -140,7 +159,11 @@ def get_headers(path):
     return headers  # Retorna um dicionário contendo os índices das colunas que contém os dados que serão usados.
 
 
-def emergency_save():  # Essa função salva todos os valores atuais
+def emergency_save() -> None:
+    """
+    Essa função salva todos os valores atuais.
+    """
+
     with open('dados/init.yaml', 'w') as file:
         safe_dump({
             'max_threads'        :        var.max_threads,
@@ -172,7 +195,11 @@ def emergency_save():  # Essa função salva todos os valores atuais
         }, file)
 
 
-def push(name, value):  # Essa função salva um valor específico.
+def push(name: str, value) -> None:
+    """
+    Essa função salva um valor específico.
+    """
+
     with open('dados/init.yaml', 'r') as file:
         dic = safe_load(file.read())
 
