@@ -1,0 +1,1 @@
+Informamos que o segurado ativo pelo CNPJ: <CNPJ>, Apólice: <APOLICE>, Nome: <NOME>, CPF: <CPF> e Matrícula: <MATRICULA>, contratado pelo cliente: <CLIENTE>, consta ativo na apólice de seguro de vida em grupo com as coberturas: <COBERTURA>, com vigência das 24:00h de <COMECO> Até 24:00h de <FINAL>.
