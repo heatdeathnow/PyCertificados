@@ -1,0 +1,44 @@
+apolice_keywords:
+- apolice
+base_text: "Informamos que o segurado ativo pelo CNPJ: <CNPJ>, Nome: <NOME>, CPF:\
+  \ <CPF> e Matr\xEDcula: <MATRICULA>, contratado pelo cliente: <CLIENTE>, consta\
+  \ ativo na ap\xF3lice de seguro de vida em grupo com as coberturas: <COBERTURA>,\
+  \ com vig\xEAncia das 24:00h de <COMECO> At\xE9 24:00h de <FINAL>."
+capital_keywords:
+- capital
+cliente_keywords:
+- cliente
+- empresa
+cnpj_keywords:
+- cnpj
+grupo_dir: dados/grupos.xlsx
+cnv_keywords:
+- cnv
+- sindicato
+grupo_keywords:
+- grupo
+cobertura_dir: dados/coberturas.xlsx
+cobertura_keywords:
+- cobertura
+cpf_keywords:
+- cpf
+data_dir: ''
+dist_left: 85
+end_period: 2023-08-31
+line_space: 18
+matricula_keywords:
+- matricula
+max_chars: 90
+max_processes: 4
+max_threads: 150
+name_keywords:
+- nome
+- segurado
+- funcionario
+output_dir: ''
+start_period: 2023-08-01
+target_threads: 60
+template_dir: dados/modelo.pdf
+text_font: Times New Roman.ttf
+text_height: 620
+text_size: 11
