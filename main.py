@@ -18,7 +18,6 @@ if __name__ == "__main__":
     var.lock = var.manager.Lock()
 
     widget = MainWindow()
-    var.widget = widget
     widget.setWindowTitle('Emissor de certificados')
     widget.show()
 

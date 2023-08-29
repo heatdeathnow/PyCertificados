@@ -42,34 +42,30 @@ def load(path: str, **kwargs) -> DataFrame:
     elif path[-4:] == ".csv":
         return read_csv(path, sep=';', **kwargs)
 
-
-def get_cnv(path: str) -> DataFrame:
+def get_grupo(path: str) -> DataFrame:
     """
     Lê todos os códigos de cobertura num arquivo externo e retorna a relação cifras-coberturas num dataframe 
     (usado para a emissão de múltiplos certificados).
     """
 
     df = load(path)
-    df = df.set_index('CNV')
+    df = df.set_index('Grupo')
     df = df.squeeze()
 
     return df
 
-
-def get_cnv_values(path: str) -> list:
+def get_grupo_values(path: str) -> list:
     """
-    Variável é um string que representa o caminho do diretório da tabela onde estão os CNV e retorna uma lista com todos os CNV válidos.
+    Variável é um string que representa o caminho do diretório da tabela onde estão os grupos e retorna uma lista com todos os grupos válidos.
     """
-
     df = load(path)
-    cnv = []
+    grupos = []
     from pandas import isna
     for i in range(len(df.index)):
         if not isna(df.iloc[i][1]):
-            cnv.append(df.iloc[i][0])
+            grupos.append(df.iloc[i][0])
 
-    return cnv
-
+    return grupos
 
 def get_coberturas(path: str) -> list:
     """
@@ -77,12 +73,12 @@ def get_coberturas(path: str) -> list:
     """
 
     df = load(path, header=None)
-    df.columns = df.iloc[0]
     cobe = []
 
     try:
-        for value in df.values:
-            cobe.append(value[0])
+        for e, value in enumerate(df.values):
+            if e == 0: continue
+            cobe.append(value[1])
     except IndexError:
         cobe = df.values
 
@@ -105,7 +101,7 @@ def get_headers(path: str) -> dict[str, str]:
                'apol': '',
                'capi': '',
                'cobe': '',
-               'cnv' : ''}
+               'grup': ''}
 
     # Depois que encontrar tal palavra-chave, ele não a substituirá se achar outra instância dela.
     nome_found = False
@@ -116,7 +112,7 @@ def get_headers(path: str) -> dict[str, str]:
     apol_found = False
     capi_found = False
     cobe_found = False
-    cnv_found  = False
+    grup_found = False
 
     for column in df.columns:
 
@@ -147,10 +143,10 @@ def get_headers(path: str) -> dict[str, str]:
         elif any(key in unidecode(column.lower().strip()) for key in var.capital_keywords) and not capi_found:
             headers['capi'] = df.columns.get_loc(column)
             capi_found = True
-
-        elif any(key in unidecode(column.lower().strip()) for key in var.cnv_keywords) and not cnv_found:
-            headers['cnv'] = df.columns.get_loc(column)
-            cnv_found = True
+        
+        elif any(key in unidecode(column.lower().strip()) for key in var.grupo_keywords) and not grup_found:
+            headers['grup'] = df.columns.get_loc(column)
+            grup_found = True
 
         elif any(key in unidecode(column.lower().strip()) for key in var.apolice_keywords) and not apol_found:
             headers['apol'] = df.columns.get_loc(column)
@@ -174,7 +170,6 @@ def emergency_save() -> None:
             'start_period'       :       var.start_period,
             'end_period'         :         var.end_period,
             'cobertura_dir'      :      var.cobertura_dir,
-            'cnv_dir'            :            var.cnv_dir,
             'template_dir'       :       var.template_dir,
             'text_font'          :          var.text_font,
             'text_size'          :          var.text_size,
@@ -191,7 +186,7 @@ def emergency_save() -> None:
             'apolice_keywords'   :   var.apolice_keywords,
             'capital_keywords'   :   var.capital_keywords,
             'cobertura_keywords' : var.cobertura_keywords,
-            'cnv_keywords'       :       var.cnv_keywords,
+            'grupo_keywords'     :     var.grupo_keywords,
         }, file)
 
 

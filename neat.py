@@ -89,18 +89,15 @@ def matr(x) -> str:
 
     return x
 
-
-def cnv(x) -> str:
+def grupo(x) -> str:
     if isna(x):
         return 'GERENTES'
 
+    elif isinstance(x, str):
+        x = int(x.upper().replace('GRUPO', '').strip())
+        x = str(x)  # Para se livrar de possíveis zeros na esquerda
+
     elif isinstance(x, (float64, int64, float, int)):
         x = str(int(trunc(x)))
-
-    if len(x) < 4:
-        x = '0' * (4 - len(x)) + x
-
-    elif len(x) > 4:
-        raise Exception(f'CNV "{x}" tem caracteres demais')
 
     return x

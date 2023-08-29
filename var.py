@@ -154,28 +154,16 @@ except (KeyError, TypeError):
     load_problem = True
 
 try:
-    cobertura_dir = dic['cobertura_dir']
+    grupo_dir = dic['grupo_dir']
 except (KeyError, TypeError):
-    print('Erro ao carregar arquivo com coberturas, pois não foi guardado. Começando processo para selecioná-lo.')
+    print('Erro ao carregar arquivo de códigos de grupos, pois não foi guardado. Começando processo para selecioná-los.')
     load_problem = True
-    cobertura_dir = critical_select_sheet('coberturas')
+    grupo_dir = critical_select_sheet('grupos')
 finally:
-    if not exists(cobertura_dir):
-        print('Erro ao carregar arquivo com coberturas, pois ele não existe. Começando processo para selecioná-lo.')
+    if not exists(grupo_dir):
+        print('Erro ao carregar arquivo de códigos de grupos, pois ele não existe. Começando processo para selecioná-lo.')
         load_problem = True
-        cobertura_dir = critical_select_sheet('coberturas')
-
-try:
-    cnv_dir = dic['cnv_dir']
-except (KeyError, TypeError):
-    print('Erro ao carregar arquivo de códigos CNV, pois não foi guardado. Começando processo para selecioná-lo.')
-    load_problem = True
-    cnv_dir = critical_select_sheet('CNV')
-finally:
-    if not exists(cnv_dir):
-        print('Erro ao carregar arquivo de códigos CNV, pois ele não existe. Começando processo para selecioná-lo.')
-        load_problem = True
-        cnv_dir = critical_select_sheet('CNV')
+        grupo_dir = critical_select_sheet('grupos')
 
 try:
     template_dir = dic['template_dir']
@@ -295,10 +283,10 @@ except (KeyError, TypeError):
     load_problem = True
 
 try:
-    cnv_keywords = dic['cnv_keywords']
+    grupo_keywords = dic['grupo_keywords']
 except (KeyError, TypeError):
-    print('Erro ao carregar palavras-chave para CNV, assumindo valor padrão de "CNV".')
-    cnv_keywords = ['CNV']
+    print('Erro ao carregar palavras-chave para GRUPOS, assumindo valor padrão de "grupo".')
+    grupo_keywords = ['grupo']
     load_problem = True
 
 template_obj = get_pdf_template()

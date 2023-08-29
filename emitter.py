@@ -13,7 +13,7 @@ import neat
 import var
 
 
-def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv='') -> None:
+def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', grup='') -> None:
     """
     Método usado para emitir um certificado. Leva nome, CPF, CNPJ, matrícula, cliente, apólice e coberturas ou código. Retorna nada.
     """
@@ -41,7 +41,7 @@ def emit_singular(name, cpf, cnpj, matr, clie, apol, capi, cobe='', cnv='') -> N
         text = text.replace('<COBERTURA>', cobe)
 
     else:
-        text = text.replace('<COBERTURA>', str(cnv))
+        text = text.replace('<COBERTURA>', str(grup))
 
     canvas = Canvas(f'{var.output_dir}{neat.cpf(cpf)} - {neat.name(name)}.pdf')  # Objeto do texto a ser salvo.
     canvas.setFont(var.text_font, var.text_size)  # Seleciona esse fonte para ser usada
@@ -70,7 +70,7 @@ def emit_from_source() -> None:
     """
 
     start_time = time()  # Horário do começo da emissão.
-    cnv = get_cnv(var.cnv_dir)
+    grupo = get_grupo(var.grupo_dir)
 
     # Abre a planilha no modo leitura otimizada para obter o número de linhas e então fechá-la.
     row_count_time = time()
@@ -154,15 +154,15 @@ def emit_from_source() -> None:
     else:
         arguments.append(lambda i: 'ERRO')
 
-    if var.headers['cobe'] != '' and var.headers['cnv'] != '':
+    if var.headers['cobe'] != '' and var.headers['grup'] != '':
         arguments.append(lambda i: df.iloc[i, var.headers['cobe']])
         arguments.append(lambda i: '')
-    elif var.headers['cobe'] != '' and var.headers['cnv'] == '':
+    elif var.headers['cobe'] != '' and var.headers['grup'] == '':
         arguments.append(lambda i: df.iloc[i, var.headers['cobe']])
         arguments.append(lambda i: '')
-    elif var.headers['cobe'] == '' and var.headers['cnv'] != '':
+    elif var.headers['cobe'] == '' and var.headers['grup'] != '':
         arguments.append(lambda i: '')
-        arguments.append(lambda i: cnv.loc[neat.cnv(df.iloc[i, var.headers['cnv']])])
+        arguments.append(lambda i: grupo.loc[neat.grupo(df.iloc[i, var.headers['grup']])])
     else:
         arguments.append(lambda i: 'ERRO')
         arguments.append(lambda i: 'ERRO')
